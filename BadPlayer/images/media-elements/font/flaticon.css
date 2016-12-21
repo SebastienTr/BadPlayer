@@ -1,0 +1,71 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 22/06/2016 15:33
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before,
+[class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
+  font-family: Flaticon;
+        font-size: 20px;
+font-style: normal;
+margin-left: 20px;
+}
+
+.flaticon-backward:before { content: "\f100"; }
+.flaticon-bluetooth:before { content: "\f101"; }
+.flaticon-crotchet:before { content: "\f102"; }
+.flaticon-demisemiquaver:before { content: "\f103"; }
+.flaticon-eject:before { content: "\f104"; }
+.flaticon-eject-1:before { content: "\f105"; }
+.flaticon-eject-2:before { content: "\f106"; }
+.flaticon-fast-forward:before { content: "\f107"; }
+.flaticon-fast-forward-1:before { content: "\f108"; }
+.flaticon-fast-forward-2:before { content: "\f109"; }
+.flaticon-hemidemisemiquaver:before { content: "\f10a"; }
+.flaticon-minim:before { content: "\f10b"; }
+.flaticon-music-player:before { content: "\f10c"; }
+.flaticon-music-player-1:before { content: "\f10d"; }
+.flaticon-nfc:before { content: "\f10e"; }
+.flaticon-pause:before { content: "\f10f"; }
+.flaticon-pause-1:before { content: "\f110"; }
+.flaticon-pause-2:before { content: "\f111"; }
+.flaticon-play:before { content: "\f112"; }
+.flaticon-play-1:before { content: "\f113"; }
+.flaticon-play-2:before { content: "\f114"; }
+.flaticon-previous:before { content: "\f115"; }
+.flaticon-previous-1:before { content: "\f116"; }
+.flaticon-previous-2:before { content: "\f117"; }
+.flaticon-rec:before { content: "\f118"; }
+.flaticon-rec-1:before { content: "\f119"; }
+.flaticon-rec-2:before { content: "\f11a"; }
+.flaticon-rewind:before { content: "\f11b"; }
+.flaticon-rewind-1:before { content: "\f11c"; }
+.flaticon-semibreve:before { content: "\f11d"; }
+.flaticon-semiquaver:before { content: "\f11e"; }
+.flaticon-skip:before { content: "\f11f"; }
+.flaticon-skip-1:before { content: "\f120"; }
+.flaticon-skip-2:before { content: "\f121"; }
+.flaticon-stop:before { content: "\f122"; }
+.flaticon-stop-1:before { content: "\f123"; }
+.flaticon-stop-2:before { content: "\f124"; }
+.flaticon-usb:before { content: "\f125"; }
+.flaticon-video-player:before { content: "\f126"; }
+.flaticon-wifi:before { content: "\f127"; }

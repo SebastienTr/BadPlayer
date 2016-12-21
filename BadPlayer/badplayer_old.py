@@ -21,17 +21,14 @@ from PyQt5.QtCore import (QCoreApplication,
 						 Qt,
 						 pyqtSignal,
 						 QObject,
-						 QTimer,
-						 QSize)
-from PyQt5.QtGui import QIcon, QPalette, QColor, QPixmap
+						 QTimer)
+from PyQt5.QtGui import QIcon, QPalette, QColor
 
 from badwidgets import *
 
 import vlc
 
 import os
-
-import logging
 
 
 class BadPlayer(QMainWindow):
@@ -47,9 +44,6 @@ class BadPlayer(QMainWindow):
 
 		self.instance = vlc.Instance()
 		self.mediaplayer = self.instance.media_player_new()
-
-		logging.getLogger("vlc").setLevel(logging.NOTSET)
-		logging.getLogger("core").setLevel(logging.NOTSET)
 
 		self.initUI()
 		self.isPaused = False
@@ -108,25 +102,13 @@ class BadPlayer(QMainWindow):
 		self.positionslider.setToolTip("Position")
 		self.positionslider.setMaximum(1000)
 		self.positionslider.sliderMoved.connect(self.setPosition)
-		self.positionslider.valueChanged.connect(self.valueChanged)
-		self.positionslider.sliderPressed.connect(self.sliderPressed)
-		self.positionvalue = 0
 
 		self.hbuttonbox = QHBoxLayout()
-		self.playicon = self.getImage('player', 'play.png')
-		self.pauseicon = self.getImage('player', 'pause.png')
-		self.playbutton = QPushButton()
-		self.playbutton.clicked.connect(self.PlayPause)
-		self.playbutton.setIcon(self.playicon)
-		self.playbutton.setIconSize(QSize(50, 50))
-		self.playbutton.setFlat(True)
+		self.playbutton = QPushButton("Play")
 		self.hbuttonbox.addWidget(self.playbutton)
+		self.playbutton.clicked.connect(self.PlayPause)
 
-		self.stopbutton = QPushButton()
-		self.stopicon = self.getImage('player', 'stop.png')
-		self.stopbutton.setIcon(self.stopicon)
-		self.stopbutton.setIconSize(QSize(50, 50))
-		self.stopbutton.setFlat(True)
+		self.stopbutton = QPushButton("Stop")
 		self.hbuttonbox.addWidget(self.stopbutton)
 		self.stopbutton.clicked.connect(self.Stop)
 
@@ -153,7 +135,6 @@ class BadPlayer(QMainWindow):
 			self.playlistsqlist.insertItem(i, qitem)
 
 		self.songsqlist = QListWidget()
-		self.songsqlist.width = 100
 		items = ('One song', 'Another', 'And another again')
 		for i, item in enumerate(items):
 			qitem = QListWidgetItem(item)
@@ -185,29 +166,19 @@ class BadPlayer(QMainWindow):
 		self.timer.setInterval(200)
 		self.timer.timeout.connect(self.updateUI)
 
-	def valueChanged(self, t):
-		self.positionvalue = t
-
-	def sliderPressed(self, t=-1):
-		self.mediaplayer.set_position(self.positionvalue / 1000.0)
-
-	def getImage(self, folder, filename):
-		icon = QIcon(QPixmap(os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename)))
-		return icon
-
 	def PlayPause(self):
 		"""Toggle play/pause status
 		"""
 		if self.mediaplayer.is_playing():
 			self.mediaplayer.pause()
-			self.playbutton.setIcon(self.playicon)
+			self.playbutton.setText("Play")
 			self.isPaused = True
 		else:
 			if self.mediaplayer.play() == -1:
 				self.OpenFile()
 				return
 			self.mediaplayer.play()
-			self.playbutton.setIcon(self.pauseicon)
+			self.playbutton.setText("Pause")
 			self.timer.start()
 			self.isPaused = False
 
@@ -215,7 +186,7 @@ class BadPlayer(QMainWindow):
 		"""Stop player
 		"""
 		self.mediaplayer.stop()
-		self.playbutton.setIcon(self.playicon)
+		self.playbutton.setText("Play")
 
 	def OpenFile(self, filename=None):
 		"""Open a media file in a MediaPlayer
