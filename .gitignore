@@ -90,3 +90,6 @@ ENV/
 
 # Fucking mac
 .DS_Store
+
+# dev local files
+.local/
