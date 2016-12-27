@@ -1,97 +1,172 @@
-import sys
-from PyQt5.QtWidgets import (QMainWindow,
-							 QTextEdit,
-							 QAction,
-							 QApplication,
-							 QPushButton,
-							 QLabel,
-							 QHBoxLayout,
-							 QVBoxLayout,
-							 QWidget,
-							 QGridLayout,
-							 QLCDNumber,
-							 QSlider,
-							 QFileDialog,
-							 QFrame,
-							 QSplitter,
-							 QStyleFactory,
-							 QListWidget,
-							 QListWidgetItem)
-from PyQt5.QtCore import (QCoreApplication,
-						 Qt,
-						 pyqtSignal,
-						 QObject,
-						 QTimer,
-						 QSize)
 from PyQt5.QtGui import QIcon, QPalette, QColor, QPixmap
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
-from badwidgets import *
-
-import vlc
-
-import os
+import badwidgets as widgets
+import badmodels as models
 
 import logging
+import yaml
+import sys
+import vlc
+import os
+
+class TestWindow(QMainWindow):
+	"""docstring for TestWindow"""
+	def __init__(self, parent):
+		super(TestWindow, self).__init__()
+		self.parent = parent
+
+		self.initUI()
+		
+	def initUI(self):
+		self.label = QtWidgets.QLabel('Yeah !', self)
+		# self.label.setObjectName("label")
+		self.setGeometry(200, 200, 200, 200)
+		self.setWindowFlags(QWindow)
+		# self.setCentralWidget(self.label)
+		self.show()
 
 
 class BadPlayer(QMainWindow):
-				
-	def __init__(self):
+
+	def __init__(self, config):
 		super().__init__()
 
 		self.title = 'Bad Player'
 		self.left = 100
 		self.top = 100
-		self.width = 1000
+		self.width = 600
 		self.height = 480
-
-		self.instance = vlc.Instance()
-		self.mediaplayer = self.instance.media_player_new()
-
-		logging.getLogger("vlc").setLevel(logging.NOTSET)
-		logging.getLogger("core").setLevel(logging.NOTSET)
-
-		self.initUI()
 		self.isPaused = False
 
+		self.config = config
+		self.clickedPL = None
+		self.clickedSong = None
+
+		self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
+		os.makedirs(self.playlistpath, exist_ok=True)
+
+		self.initVLC(self.config['player'])
+		self.initDB(self.config['database'])
+		self.initUI()
+
+		# hiphop = self.session.query(models.Playlist).all()[1]
+		# newsong = models.Song(name="My Hip Hop song !", localpath="02.mp3", source="File")
+		# newsong.playlists.append(hiphop)
+		# self.session.add(newsong)
+		# self.session.commit()
+
+
+	def initVLC(self, config):
+		self.instance = vlc.Instance()
+		self.mediaplayer = self.instance.media_player_new()
+		self.mediaplayer.audio_set_volume(config['default_volume'])
+
+		logging.getLogger("vlc").setLevel(logging.NOTSET)
+		logging.getLogger("mpgatofixed32").setLevel(logging.NOTSET)		
+		logging.getLogger("core vout").setLevel(logging.NOTSET)
+
+	def initDB(self, config):
+		self.session = models.createSession(config)
+
 	def initUI(self):
-
-		# textEdit = QTextEdit()
-		# self.setCentralWidget(textEdit)
-
-		# self.initMenu()
 		self.initPlayer()
-		# self.initGrid()
-
-		# self.initSignals()
+		self.initMenu()
 
 		self.setGeometry(self.left, self.top, self.width, self.height)
 		self.setWindowTitle(self.title)
 		self.show()
 
-	def initMenu(self):
-		print ("Init menu")
-		self.mainMenu = self.menuBar() 
-		self.mainMenu.setNativeMenuBar(False)
-		fileMenu = self.mainMenu.addMenu('File')
-		editMenu = self.mainMenu.addMenu('Edit')
-		viewMenu = self.mainMenu.addMenu('View')
-		searchMenu = self.mainMenu.addMenu('Search')
-		toolsMenu = self.mainMenu.addMenu('Tools')
-		helpMenu = self.mainMenu.addMenu('Help')
+		self.setStatus("Ready")
 
-		exitButton = QAction(QIcon('exit24.png'), 'Exit', self)
-		exitButton.setShortcut('Ctrl+Q')
-		exitButton.setStatusTip('Exit application')
-		exitButton.triggered.connect(self.close)
-		fileMenu.addAction(exitButton)
+	def initMenu(self):
+		# Actions
+		open = QAction("&Open", self)
+		open.triggered.connect(self.OpenFile)
+		addPlaylist = QAction("&Add playlist", self)
+		addPlaylist.triggered.connect(self.addPlaylist)
+		addSongFromFile = QAction("&Add song from file", self)
+		addSongFromFile.triggered.connect(self.addSongFromFile)
+		exit = QAction("&Exit", self)
+		exit.triggered.connect(sys.exit)
+		newWindow = QAction("&New window", self)
+		newWindow.triggered.connect(self.newWindow)
+
+		# Menubar
+		menubar = self.menuBar()
+		filemenu = menubar.addMenu("&File")
+		filemenu.addAction(open)
+		filemenu.addSeparator()
+		filemenu.addAction(exit)
+		filemenu.addAction(newWindow)
+		playlistmenu = menubar.addMenu("&Playlists")
+		playlistmenu.addAction(addPlaylist)
+		songsmenu = menubar.addMenu("&Songs")
+		songsmenu.addAction(addSongFromFile)
+		searchMenu = menubar.addMenu("&Help")
+		searchMenu.addAction(open)
 
 	def initPlayer(self):
 		"""Set up the user interface, signals & slots
 		"""
 		self.widget = QWidget(self)
 		self.setCentralWidget(self.widget)
+		self.getIcons()
 
+		self.initVideoFrame()
+		test = Qt.Key_MediaPlay
+
+		# Position slider
+		self.positionslider = QSlider(Qt.Horizontal, self)
+		self.positionslider.setToolTip("Position")
+		self.positionslider.setMaximum(1000)
+		self.positionslider.sliderMoved.connect(self.setPosition)
+		self.positionslider.valueChanged.connect(self.valueChanged)
+		self.positionslider.sliderPressed.connect(self.sliderPressed)
+		self.positionvalue = 0
+
+		# Buttons
+		self.hbuttonbox = QHBoxLayout()
+		self.playbutton = self.getButton(funct=self.PlayPause, icon=self.playicon)
+		self.hbuttonbox.addWidget(self.playbutton)
+		self.stopbutton = self.getButton(funct=self.Stop, icon=self.stopicon)
+		self.hbuttonbox.addWidget(self.stopbutton)
+
+		# Volume slider
+		self.hbuttonbox.addStretch(1)
+
+		self.volumeslider = QSlider(Qt.Horizontal, self)
+		self.volumeslider.setToolTip("Volume")
+		self.volumeslider.setMaximum(100)
+		self.volumeslider.setValue(self.mediaplayer.audio_get_volume())
+		self.hbuttonbox.addWidget(self.volumeslider)
+		self.volumeslider.valueChanged.connect(self.setVolume)
+
+		self.listbutton = self.getButton(funct=self.ShowHide, text="show", style=False)
+		# self.fullscreenbutton = self.getButton(funct=self.FullScreen, text="FullScreen", style=False)
+		# self.hbuttonbox.addWidget(self.fullscreenbutton)
+		self.hbuttonbox.addWidget(self.listbutton)
+
+		self.vplayerlayout = QVBoxLayout()
+		self.vplayerlayout.addWidget(self.videoframe)
+		self.vplayerlayout.addWidget(self.positionslider)
+		self.vplayerlayout.addLayout(self.hbuttonbox)
+
+		self.initLists()
+
+		self.mainlayout = QHBoxLayout()
+		self.mainlayout.addLayout(self.vplayerlayout)
+		self.mainlayout.addLayout(self.listslayout)
+
+		self.widget.setLayout(self.mainlayout)
+
+		self.timer = QTimer(self)
+		self.timer.setInterval(200)
+		self.timer.timeout.connect(self.updateUI)
+
+	def initVideoFrame(self):
 		# In this widget, the video will be drawn
 		if sys.platform == "darwin": # for MacOS
 			from PyQt5.QtWidgets import QMacCocoaViewContainer	
@@ -104,89 +179,76 @@ class BadPlayer(QMainWindow):
 		self.videoframe.setPalette(self.palette)
 		self.videoframe.setAutoFillBackground(True)
 
-		self.positionslider = QSlider(Qt.Horizontal, self)
-		self.positionslider.setToolTip("Position")
-		self.positionslider.setMaximum(1000)
-		self.positionslider.sliderMoved.connect(self.setPosition)
-		self.positionslider.valueChanged.connect(self.valueChanged)
-		self.positionslider.sliderPressed.connect(self.sliderPressed)
-		self.positionvalue = 0
-
-		self.hbuttonbox = QHBoxLayout()
-		self.playicon = self.getImage('player', 'play.png')
-		self.pauseicon = self.getImage('player', 'pause.png')
-		self.playbutton = QPushButton()
-		self.playbutton.clicked.connect(self.PlayPause)
-		self.playbutton.setIcon(self.playicon)
-		self.playbutton.setIconSize(QSize(50, 50))
-		self.playbutton.setFlat(True)
-		self.hbuttonbox.addWidget(self.playbutton)
-
-		self.stopbutton = QPushButton()
-		self.stopicon = self.getImage('player', 'stop.png')
-		self.stopbutton.setIcon(self.stopicon)
-		self.stopbutton.setIconSize(QSize(50, 50))
-		self.stopbutton.setFlat(True)
-		self.hbuttonbox.addWidget(self.stopbutton)
-		self.stopbutton.clicked.connect(self.Stop)
-
-		self.hbuttonbox.addStretch(1)
-		self.volumeslider = QSlider(Qt.Horizontal, self)
-		self.volumeslider.setMaximum(100)
-		self.volumeslider.setValue(self.mediaplayer.audio_get_volume())
-		self.volumeslider.setToolTip("Volume")
-		self.hbuttonbox.addWidget(self.volumeslider)
-		self.volumeslider.valueChanged.connect(self.setVolume)
-
-		self.vplayerlayout = QVBoxLayout()
-		self.vplayerlayout.addWidget(self.videoframe)
-		self.vplayerlayout.addWidget(self.positionslider)
-		self.vplayerlayout.addLayout(self.hbuttonbox)
-
-
+	def initLists(self):
 		self.listslayout = QHBoxLayout()
 
-		self.playlistsqlist = QListWidget()
-		items = ('Jazz', 'Rock', 'Hip Hop')
-		for i, item in enumerate(items):
-			qitem = QListWidgetItem(item)
-			self.playlistsqlist.insertItem(i, qitem)
-
-		self.songsqlist = QListWidget()
-		self.songsqlist.width = 100
-		items = ('One song', 'Another', 'And another again')
-		for i, item in enumerate(items):
-			qitem = QListWidgetItem(item)
-			self.songsqlist.insertItem(i, qitem)
+		self.songsqlist = widgets.SongsWidget(self, models.Song)
+		self.playlistsqlist = widgets.PlaylistsWidget(self, models.Playlist, self.songsqlist)
 
 		self.listslayout.addWidget(self.playlistsqlist)
 		self.listslayout.addWidget(self.songsqlist)
+		self.qlistsIsHided = False
+		self.width += 600
+
+	def newWindow(self):
+		print ("New window ...")
+		nw = TestWindow(self)
+		nw.show()
 
 
-		self.mainlayout = QHBoxLayout()
-		self.mainlayout.addLayout(self.vplayerlayout)
-		self.mainlayout.addLayout(self.listslayout)
-
-
-
-		self.widget.setLayout(self.mainlayout)
-
-		open = QAction("&Open", self)
-		open.triggered.connect(self.OpenFile)
-		exit = QAction("&Exit", self)
-		exit.triggered.connect(sys.exit)
-		menubar = self.menuBar()
-		filemenu = menubar.addMenu("&File")
-		filemenu.addAction(open)
-		filemenu.addSeparator()
-		filemenu.addAction(exit)
-
-		self.timer = QTimer(self)
-		self.timer.setInterval(200)
-		self.timer.timeout.connect(self.updateUI)
 
 	def valueChanged(self, t):
 		self.positionvalue = t
+
+	def getButton(self, funct=None, icon=None, text=None, style=True):
+		if text is not None:
+			button = QPushButton(text)
+		else:
+			button = QPushButton()
+		if funct is not None:
+			button.clicked.connect(funct)
+		if icon is not None:
+			button.setIcon(icon)
+			button.setIconSize(QSize(50, 50))
+		if style is True:
+			button.setFlat(True)
+			button.setStyleSheet("color: black; background-color: black")
+
+		return button
+
+	def FullScreen(self):
+		print ('fs')
+
+	def ShowHide(self):
+		# print (self.geometry().width(), self.geometry().height())
+
+		# print (locals())
+
+		if self.qlistsIsHided is False:
+			self.playlistsqlist.hide()
+			self.songsqlist.hide()
+			# self.resize((self.width), self.height)
+			self.resize(self.vplayerlayout.geometry().width() + 23, self.geometry().height())
+			self.qlistsIsHided = True
+		else:
+			# self.resize((self.width + PWidth + SWidth + 200), self.height)
+			self.playlistsqlist.show()
+			self.songsqlist.show()
+			# self.playlistsqlist.resize(30, self.playlistsqlist.geometry().height())
+			# self.songsqlist.resize(30, self.songsqlist.geometry().height())
+			self.resize((self.geometry().width() + self.listslayout.geometry().width() + 281), self.geometry().height())
+			# self.resize((self.width + 590), self.geometry().height())
+			self.qlistsIsHided = False
+
+	def resizeEvent(self, resizeEvent):
+		# print ("The window has been resized - ", resizeEvent.size())
+		pass
+
+
+	def getIcons(self):
+		self.playicon = self.getImage('player', 'play.png')
+		self.pauseicon = self.getImage('player', 'pause.png')
+		self.stopicon = self.getImage('player', 'stop.png')
 
 	def sliderPressed(self, t=-1):
 		self.mediaplayer.set_position(self.positionvalue / 1000.0)
@@ -217,31 +279,53 @@ class BadPlayer(QMainWindow):
 		self.mediaplayer.stop()
 		self.playbutton.setIcon(self.playicon)
 
+	def addSongFromFile(self):
+		dialog = widgets.AddSongDialog(self)
+		ok, filename, playlistname, playlistid = dialog.get()
+		# print ("Ok :", ok)
+		# print ("filename :", filename)
+		# print ("playlistname :", playlistname)
+		# print ("playlistid :", playlistid)
+		# print ("self.playlistpath :", self.playlistpath)
+		if ok:
+			models.add_song(self.session, filename, playlistname, playlistid, self.playlistpath)
+
+	def addPlaylist(self):
+		dialog = widgets.AddPlaylistDialog(self)
+		ok = dialog.showDialog()
+		if ok:
+			name = dialog.getText()
+			path = self.playlistpath + '/' + name
+			newPlaylist = models.Playlist(name=name)
+			os.makedirs(self.playlistpath + '/' + name, exist_ok=True)
+			self.session.add(newPlaylist)
+			self.session.commit()
+			self.playlistsqlist.refresh()
+			self.setStatus('Playlist added')
+		else:
+			self.setStatus('Operation cancelled')
+
+
 	def OpenFile(self, filename=None):
 		"""Open a media file in a MediaPlayer
 		"""
+		filename=None
 		if filename is None:
 			filename = QFileDialog.getOpenFileName(self, "Open File", os.path.expanduser('~'))[0]
 		if not filename:
 			return
 
-		# create the media
-		if sys.version < '3':
+		if sys.version < '3': 
 			filename = unicode(filename)
-		self.media = self.instance.media_new(filename)
-		# put the media in the media player
-		self.mediaplayer.set_media(self.media)
 
-		# parse the metadata of the file
+		self.setFile(filename)
+
+	def setFile(self, filename):
+		self.media = self.instance.media_new(filename)
+		self.mediaplayer.set_media(self.media)
 		self.media.parse()
-		# set the title of the track as window title
 		self.setWindowTitle(self.media.get_meta(0))
 
-		# the media player has to be 'connected' to the QFrame
-		# (otherwise a video would be displayed in it's own window)
-		# this is platform specific!
-		# you have to give the id of the QFrame (or similar object) to
-		# vlc, different platforms have different functions for this
 		if sys.platform.startswith('linux'): # for Linux using the X Server
 			self.mediaplayer.set_xwindow(self.videoframe.winId())
 		elif sys.platform == "win32": # for Windows
@@ -249,6 +333,7 @@ class BadPlayer(QMainWindow):
 		elif sys.platform == "darwin": # for MacOS
 			self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
 		self.PlayPause()
+		self.setStatus("Media added to player")
 
 	def setVolume(self, Volume):
 		"""Set the volume
@@ -260,10 +345,6 @@ class BadPlayer(QMainWindow):
 		"""
 		# setting the position to where the slider was dragged
 		self.mediaplayer.set_position(position / 1000.0)
-		# the vlc MediaPlayer needs a float value between 0 and 1, Qt
-		# uses integer variables, so you need a factor; the higher the
-		# factor, the more precise are the results
-		# (1000 should be enough)
 
 	def updateUI(self):
 		"""updates the user interface"""
@@ -274,16 +355,36 @@ class BadPlayer(QMainWindow):
 			# no need to call this function if nothing is played
 			self.timer.stop()
 			if not self.isPaused:
-				# after the video finished, the play button stills shows
-				# "Pause", not the desired behavior of a media player
-				# this will fix it
 				self.Stop()
 
+	def setStatus(self, message):
+		if message is None:
+			self.statusBar().hide()
+		else:
+			self.statusBar().showMessage(message)
+
+	## Need play/pause for the Space key event
+	def keyPressEvent(self, e):
+		# print ("Key press event : ", e.text())
+		self.statusBar().showMessage(e.text() + ' key was pressed')
+		if e.key() == Qt.Key_Escape:
+			self.close()
+
+def loadConfig():
+	config = None
+	# print ('###########', "{}/config.yml".format(os.path.realpath(os.path.dirname(__file__))))
+	configpath = "{}/config.yml".format(os.path.realpath(os.path.dirname(__file__)))
+	with open(configpath, 'r') as stream:
+		try:
+			config = yaml.load(stream)
+		except yaml.YAMLError as exc:
+			print ("Wrong config file ./config.yml" + str(exc))
+			os._exit(1)
+	return config
 
 def main():
 	app = QApplication(sys.argv)
-	ex = BadPlayer()
+	config = loadConfig()
+	ex = BadPlayer(config)
 	sys.exit(app.exec_())
 
-if __name__ == '__main__':
-	main()

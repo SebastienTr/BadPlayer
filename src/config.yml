@@ -1,0 +1,10 @@
+database:
+    path: "db.sqlite3"
+    user: "user"
+    password: "password"
+
+browser:
+    playlistpath: "./playlists"
+
+player:
+    default_volume: 60

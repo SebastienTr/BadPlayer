@@ -7,11 +7,12 @@ Usage:
 
 from setuptools import setup
 
-APP = ['BadPlayer/badplayer.py']
+APP = ['src/main.py']
 DATA_FILES = []
 OPTIONS = {'argv_emulation': True}
 
 setup(
+	name="BadPlayer",
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},

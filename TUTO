@@ -1,0 +1,127 @@
+
+
+
+Try this:
+import Homepage <-- import the whole thing
+
+then:
+class Home(QtWidgets.QMainWindow, Homepage.Ui_HomeWindow): <-- import the UI there
+
+
+
+
+
+
+
+
+
+
+
+https://pythonspot.com/en/pyqt5-file-dialog/
+
+http://projects.skylogic.ca/blog/how-to-install-pyqt5-and-build-your-first-gui-in-python-3-4/
+
+http://stackoverflow.com/questions/20996193/is-there-a-tutorial-specifically-for-pyqt5
+
+
+
+
+
+
+
+
+
+
+
+As my travels into the depths of PyQt5 continue, so shall I continue to update this answer with some of the shinier treasures I find.
+
+That being said, I am now taking a "rough draft" stab at a quick intro to PyQt5. I will also provide links to helpful resources. I am new to this framework as well, and I will elaborate on what I believe to be a good strategy for using it, as I figure that strategy out. There are likely other good strategies, so if anyone has anything to add, then please leave a comment. This is very much a work in progress.
+
+Strategy
+
+I've learned much from the example code as suggested in the other answer, but something the examples don't help with is PyQt5's deep magic. Frameworks with a lot of magic in them (PyQt5, Django, SQLAlchemy, ...) are great because an enormous amount of drudgery is abstracted away from you. On the flip side, it is not always clear what the hell is going on, or what you're supposed to do about it.
+
+Luckily, it seems we have options:
+
+QtDesigner: For those days when your keyboard catches fire, there's a rockin' GUI-Builder called in the installation package. When you see the code this produces (perhaps only in the community version?), you'll see why this may not be the panacea it seems.
+QML: Another candidate for panacea: declarative GUI building from formatted JSON. Yum.
+Qt Quick: The framework for QML. By this point, it may seem tantalizingly easy, but don't get sucked in by this stuff just yet. It always seems to come down to learning it by hand.
+The Model-View Framework(1): Model-View (not MVC) separates the code that deals with presentation/interaction from the code that manages the data, with the aim of providing modularity.
+Coding in PyQt5 is greatly simplified by using the set of classes that implement the Model-View design pattern. Model-View is an evolution of Model-View-Controller (MVC), in which the Controller has been reunited with the View. They seem like strange bedfellows, but, most of the program's logic is dealing with either the user, or data: it seems to make a certain sense, at least at a stratospheric level.
+
+From a bird's eye:
+
+Architecture(s)
+
+Model-View-Controller
+
+This widely-used design pattern separates the application into 3 layers:
+
+Model ~> Encapsulates the data. Notifies View and Controller of any changes to the underlying data. This causes updates to the display of output or available commands, respectively.
+View ~> Displays the relevant output from the Model to the user.
+Controller ~> Encapsulates user interaction, and notifies the Model and View of relevant events.
+Model-View
+
+The Graphics View Framework(1) ~> Represent everything (including embedded QWidgets, etc) inside a QGraphicsScene as a QGraphicsItem (or derivative thereof), including proxy classes for embedding widgets. The items are supposedly highly optimized, and integrating OpenGL support is a one-liner, which is nice.
+This design pattern puts the Controller inside the View. This way, the view is capable of handling the entirety of the user's interaction. In concrete terms, these are the Signals and Slots mechanisms.
+
+User Interaction Management
+
+Callbacks
+
+Signals and Slots
+
+..... ** I'm sorry, but I must sign off now. I'll be back to continue to add to this. **
+
+Practical Example(s)
+
+Like, for instance, you can take a tree view from the itemviews/editabletreemodel example, then swap in a file system model (QFileSystemModel) from the itemviews/dirview example and you've got a full (working) view of your directory tree. Pretty snazzy.
+
+So, you would take the code from the editabletreemodel example:
+
+headers = ("Title", "Description")
+
+file = QFile(':/default.txt')
+file.open(QIODevice.ReadOnly)
+model = TreeModel(headers, file.readAll())
+file.close()
+
+self.view.setModel(model)
+...and swap in the model from dirview:
+
+model = QFileSystemModel()
+model.setRootPath('')
+self.view.setModel(model)
+...and it just works. Amazing.
+
+The next step (in my case) (*I think) is implementing a custom model which I will then use several views concurrently, but I don't know if that kinda thing fits your use case.
+
+Resources
+
+Here are some gems I found on my travels. Hopefully they help you on yours.
+
+This is a tutorial on Model-View for Qt5.(1) It is a very detailed document from the official Qt5 docs. A good deal of useful documentation can be found at the Qt5 site. Keep in mind, it's for Qt5 (the C++ library), but the difference is trivial to read through (and the PyQt5 official docs point there anyway).
+
+This PDF contains a quick high-level to PyQt4's Model-View framework. Note that is it for PyQt4 (not PyQt5), but it is actually for Python (as opposed to C++), and I found it very quickly taught me a lot.
+
+I am just starting to play with the Graphics View, and am finding this tutorial on the Graphics View Framework very helpful. This is the same View that is used in the qtdemo example code to generate some slick effects. I'll be updating this in a bit.
+
+This is a complete list of all of the Qt5 Modules.
+
+This is a complete list of all of the Qt5 Classes.
+
+This is a complete list of all functions in the Qt5 API.
+
+As katsh pointed out in another answer's comments, here is a link to the example code for PyQt5.2.1 on GitHub
+
+Additionally, a copy of the example code comes packaged with your distribution and can be found at:
+
+%PYTHON_HOME%\Lib\site-packages\PyQt5\examples
+If you're using PyDev (Eclipse), you can run examples by simply right-clicking an example's main module file in PyDev Package Explorer or Navigator =:> Run As =:> Python Run
+
+The best one, in my (not so) humble opinion, is:
+
+%PYTHON_HOME%\Lib\site-packages\PyQt5\examples\qtdemo\qtdemo.py
+Among my current projects, I'm in the process of reverse engineering this example. If you check it out, you'll see why. To be continued.. ;)
+
+Enjoy!

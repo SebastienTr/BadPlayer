@@ -93,3 +93,7 @@ ENV/
 
 # dev local files
 .local/
+
+# Playlists
+playlists
+db.sqlite3
