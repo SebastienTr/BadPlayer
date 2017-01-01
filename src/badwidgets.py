@@ -2,24 +2,31 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import badmodels as models
 import random
-from AddFileDialog import Ui_AddFileDialog
+from ui.AddFileDialog import Ui_AddFileDialog
 
 import os
 import sys
 
-class ListWidgetItem(QListWidgetItem):
+# class ListWidgetItem(QListWidgetItem):
+# 	def __init__(self, item, id=0, dbitem=None):
+# 		super(ListWidgetItem, self).__init__(item)
+# 		self.id = id
+# 		self.item = item
+# 		self.dbitem = dbitem
+
+class TableWidgetItem(QTableWidgetItem):
 	def __init__(self, item, id=0, dbitem=None):
-		super(ListWidgetItem, self).__init__(item)
+		super().__init__(item)
 		self.id = id
 		self.item = item
 		self.dbitem = dbitem
 
-class ExtendedQLabel(QLabel):
-	def __init__(self, parent):
-		QLabel.__init__(self, parent)
+# class ExtendedQLabel(QLabel):
+# 	def __init__(self, parent):
+# 		QLabel.__init__(self, parent)
 
-	def mouseReleaseEvent(self, ev):
-		self.emit(SIGNAL('clicked()'))
+# 	def mouseReleaseEvent(self, ev):
+# 		self.emit(SIGNAL('clicked()'))
 
 class ListWidget(QWidget):
 	"""docstring for player"""
