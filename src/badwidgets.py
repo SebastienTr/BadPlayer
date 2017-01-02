@@ -174,7 +174,8 @@ class AddSongDialog(Ui_AddFileDialog):
 		if filename is None:
 			fdialog = QFileDialog()
 			# fdialog.selectMimeTypeFilter(("*.mp3"))
-			filename = fdialog.getOpenFileName(self.parent, "Open File", os.path.expanduser('~'))[0]
+			filters = "Music/Video files (*.mp3 *.wav *.flac *.avi *.mkv *.mp4 *.mov)"
+			filename = fdialog.getOpenFileName(self.parent, "Open File", os.path.expanduser('~'), filters)[0]
 		if not filename:
 			return
 		if sys.version < '3': 

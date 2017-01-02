@@ -20,7 +20,7 @@ setup(
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
-    setup_requires=['py2app', 'PyQt5', 'sqlalchemy', 'pyyaml'],
+    setup_requires=['py2app', 'PyQt5', 'sqlalchemy', 'pyyaml', 'eyed3'],
     # packages=['PyQt5', 'sqlalchemy', 'pyyaml'],
     author = "Sébastien Treille",
     author_email = "c2ViYXN0aWVudHJlaWxsZUBnbWFpbC5jb20=",

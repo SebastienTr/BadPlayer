@@ -15,6 +15,8 @@ import os
 # from ui.MainWindow import Ui_MainWindow
 from ui.MainWindow_test import Ui_MainWindow
 
+from downloader import Downloader
+
 # class BadPlayer(QMainWindow, Ui_MainWindow_test):
 class BadPlayer(QMainWindow, Ui_MainWindow):
 	"""docstring for BadPlayer"""
@@ -28,6 +30,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.clickedSong = None
 		self.firstFillPL = True
 		self.firstFillSG = True
+		self.downloader = Downloader(self)
 
 		self.setupUi(self)
 
@@ -40,13 +43,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.initMenu()
 
 		self.show()
-
-		self.afterShow()
-
-	def afterShow(self):
-		# self.playlistTable.setColumnWidth(0, self.playlistTable.geometry().width())
-		# self.songTable.setColumnWidth(0, self.songTable.geometry().width())
-		pass
 
 	def initUI(self):
 		self.initButton()
@@ -66,12 +62,12 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		self.songTable.itemDoubleClicked.connect(self.musicDoubleClicked)
 
-
 	def initMenu(self):
 		self.actionOpen.triggered.connect(self.OpenFile)
 		self.actionExit.triggered.connect(sys.exit)
 		self.actionAddPlaylist.triggered.connect(self.addPlaylist)
 		self.actionAddMusicFromFile.triggered.connect(self.addSongFromFile)
+		self.actionOpenDownloader.triggered.connect(self.openDownloader)
 
 	def fillPlaylistTable(self):
 		items = self.session.query(models.Playlist).all()
@@ -85,7 +81,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.qall = widgets.TableWidgetItem('All')
 		self.playlistTable.setItem(0, 0, self.qall)
 		for i, item in enumerate(items):
-			print ('fill ', item.id, item)
+			# print ('fill ', item.id, item)
 			qitem = widgets.TableWidgetItem(str(item), id=item.id, dbitem=item)
 			self.playlistTable.setItem(i + 1, 0, qitem)
 
@@ -167,6 +163,10 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	# 	super().setupUi(self)
 	# 	# self.widget.setLayout(self.gridLayout)
 
+	def openDownloader(self):
+		self.downloader.show()
+		print ('Open downloader')
+
 	def getIcons(self):
 		self.playicon = self.getImage('player', 'play.png')
 		self.pauseicon = self.getImage('player', 'pause.png')
@@ -176,7 +176,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		# if current is None:
 		# 	self.playlistTable.setCurrentItem(prev)
 		# 	return
-		print ('Playlist changed', current.id, current.text())
+		# print ('Playlist changed', current.id, current.text())
 		self.currentPlaylist = current
 		self.fillMusicTable(current)
 
@@ -312,7 +312,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		if minutes < 10:
 			minutes = "0" + str(minutes)
 
-		print (minutes, seconds)
+		# print (minutes, seconds)
 
 		string = "{}:{}:{}".format(hours, minutes, seconds)
 

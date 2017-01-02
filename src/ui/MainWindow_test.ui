@@ -211,6 +211,8 @@
     <addaction name="actionAddMusicFromYoutube"/>
     <addaction name="actionAddMusicFromSoundcloud"/>
     <addaction name="separator"/>
+    <addaction name="actionOpenDownloader"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -244,6 +246,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOpenDownloader">
+   <property name="text">
+    <string>Open downloader</string>
    </property>
   </action>
  </widget>

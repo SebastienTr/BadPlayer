@@ -8,11 +8,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(640, 480)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_Downloader(object):
+    def setupUi(self, Downloader):
+        Downloader.setObjectName("Downloader")
+        Downloader.resize(640, 480)
+        self.centralwidget = QtWidgets.QWidget(Downloader)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout_2.setObjectName("gridLayout_2")
@@ -43,41 +43,41 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(3, item)
         self.verticalLayout.addWidget(self.tableWidget)
         self.gridLayout_2.addLayout(self.verticalLayout, 0, 0, 1, 1)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        Downloader.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(Downloader)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 640, 22))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        Downloader.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(Downloader)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        Downloader.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(Downloader)
+        QtCore.QMetaObject.connectSlotsByName(Downloader)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Downloader):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Downloader"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.pushButton_2.setText(_translate("MainWindow", "PushButton"))
+        Downloader.setWindowTitle(_translate("Downloader", "Downloader"))
+        self.pushButton.setText(_translate("Downloader", "PushButton"))
+        self.pushButton_2.setText(_translate("Downloader", "PushButton"))
         item = self.tableWidget.verticalHeaderItem(0)
-        item.setText(_translate("MainWindow", "1"))
+        item.setText(_translate("Downloader", "1"))
         item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Name"))
+        item.setText(_translate("Downloader", "Name"))
         item = self.tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Size"))
+        item.setText(_translate("Downloader", "Size"))
         item = self.tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Progress"))
+        item.setText(_translate("Downloader", "Progress"))
         item = self.tableWidget.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Time"))
+        item.setText(_translate("Downloader", "Time"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    Downloader = QtWidgets.QMainWindow()
+    ui = Ui_Downloader()
+    ui.setupUi(Downloader)
+    Downloader.show()
     sys.exit(app.exec_())
 

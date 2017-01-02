@@ -128,6 +128,8 @@ class Ui_MainWindow(object):
         self.actionAddMusicFromSoundcloud.setObjectName("actionAddMusicFromSoundcloud")
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
+        self.actionOpenDownloader = QtWidgets.QAction(MainWindow)
+        self.actionOpenDownloader.setObjectName("actionOpenDownloader")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionAddPlaylist)
@@ -135,6 +137,8 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionAddMusicFromFile)
         self.menuFile.addAction(self.actionAddMusicFromYoutube)
         self.menuFile.addAction(self.actionAddMusicFromSoundcloud)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionOpenDownloader)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menubar.addAction(self.menuFile.menuAction())
@@ -160,6 +164,7 @@ class Ui_MainWindow(object):
         self.actionAddMusicFromYoutube.setText(_translate("MainWindow", "Add music from Youtube"))
         self.actionAddMusicFromSoundcloud.setText(_translate("MainWindow", "Add music from Soundcloud"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+        self.actionOpenDownloader.setText(_translate("MainWindow", "Open downloader"))
 
 
 if __name__ == "__main__":
