@@ -58,46 +58,46 @@ class ListWidget(QWidget):
 			qitem = ListWidgetItem(str(item), id=item.id)
 			self.list.insertItem(items[i].id, qitem)
 
-class SongsWidget(ListWidget):
-	"""docstring for SongsWidget"""
-	def __init__(self, parent, model):
-		super().__init__(parent, model, fill=False)
-		self.parent = parent
-		self.model = model
-		self.playlist = None
-		self.list.itemDoubleClicked.connect(self.item_doubleclicked)
+# class SongsWidget(ListWidget):
+# 	"""docstring for SongsWidget"""
+# 	def __init__(self, parent, model):
+# 		super().__init__(parent, model, fill=False)
+# 		self.parent = parent
+# 		self.model = model
+# 		self.playlist = None
+# 		self.list.itemDoubleClicked.connect(self.item_doubleclicked)
 
-	def fill(self, playlist):
-		self.list.clear()
-		self.playlist = playlist
-		if playlist.id == 0:
-			items = self.parent.session.query(self.model).all()
-			# items = random.shuffle(items)
-		else:
-			items = self.parent.session.query(self.model).filter(self.model.playlists.any(models.Playlist.id == playlist.id))
-		for i, item in enumerate(items):
-			qitem = ListWidgetItem(str(item), id=item.id, dbitem=item)
-			self.list.insertItem(items[i].id, qitem)
+# 	def fill(self, playlist):
+# 		self.list.clear()
+# 		self.playlist = playlist
+# 		if playlist.id == 0:
+# 			items = self.parent.session.query(self.model).all()
+# 			# items = random.shuffle(items)
+# 		else:
+# 			items = self.parent.session.query(self.model).filter(self.model.playlists.any(models.Playlist.id == playlist.id))
+# 		for i, item in enumerate(items):
+# 			qitem = ListWidgetItem(str(item), id=item.id, dbitem=item)
+# 			self.list.insertItem(items[i].id, qitem)
 
-	def item_doubleclicked(self, item):
-		song = item.dbitem
-		path = '{}/{}/{}'.format(self.parent.playlistpath, song.playlists[0].name, song.localpath)
-		self.parent.setFile(path)
+# 	def item_doubleclicked(self, item):
+# 		song = item.dbitem
+# 		path = '{}/{}/{}'.format(self.parent.playlistpath, song.playlists[0].name, song.localpath)
+# 		self.parent.setFile(path)
 
-class PlaylistsWidget(ListWidget):
-	"""docstring for SongsWidget"""
-	def __init__(self, parent, model, songslist):
-		super().__init__(parent, model, fill=True)
-		self.parent = parent
-		self.model = model
-		self.songslist = songslist
-		self.list.currentItemChanged.connect(self.item_click)
+# class PlaylistsWidget(ListWidget):
+# 	"""docstring for SongsWidget"""
+# 	def __init__(self, parent, model, songslist):
+# 		super().__init__(parent, model, fill=True)
+# 		self.parent = parent
+# 		self.model = model
+# 		self.songslist = songslist
+# 		self.list.currentItemChanged.connect(self.item_click)
 
-	def item_click(self, current, prev):
-		# print ('hehe', current.text())
-		# print ('Item changed :', current.text(), current.id)
-		self.parent.clickedPL = current
-		self.songslist.fill(current)
+# 	def item_click(self, current, prev):
+# 		# print ('hehe', current.text())
+# 		# print ('Item changed :', current.text(), current.id)
+# 		self.parent.clickedPL = current
+# 		self.songslist.fill(current)
 
 
 class AddPlaylistDialog(QWidget):
@@ -142,7 +142,7 @@ class AddPlaylistDialog(QWidget):
 # 	def getText(self):
 # 		return self.__text
 
-class AddSongDialog(Ui_AddFileDialog):
+class AddMusicDialog(Ui_AddFileDialog):
 	def __init__(self, parent):
 		Ui_AddFileDialog.__init__(self)
 		self.dialog = QDialog()
@@ -158,14 +158,15 @@ class AddSongDialog(Ui_AddFileDialog):
 		for item in playlistsItems:
 			self.playlistBox.addItem(item.name, userData=item.id)
 
-
-
 	def get(self):
 		ok = self.dialog.exec_()
 		playlistname = self.playlistBox.currentText()
 		playlistid = self.playlistBox.currentData()
 
-		return ok, self.filename, playlistname, playlistid
+		index = self.tabWidget.currentIndex()
+		url = self.url.text()
+		print (url)
+		return ok, self.filename, playlistname, playlistid, index, url
 
 	def OpenFile(self, filename=None):
 		"""Open a media file in a MediaPlayer
@@ -182,7 +183,7 @@ class AddSongDialog(Ui_AddFileDialog):
 			filename = unicode(filename)
 		self.filename = filename
 
-		self.pathLabel.setText(filename)
+		self.fileLabel.setText(filename)
 
 
 # class AddSongDialog(QDialog):

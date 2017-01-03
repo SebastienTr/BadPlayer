@@ -1,4 +1,5 @@
-
+Project structure example:
+https://github.com/nick125/ArduinoIDE-PyQt/tree/master/gui
 
 
 Try this:
@@ -6,8 +7,6 @@ import Homepage <-- import the whole thing
 
 then:
 class Home(QtWidgets.QMainWindow, Homepage.Ui_HomeWindow): <-- import the UI there
-
-
 
 
 

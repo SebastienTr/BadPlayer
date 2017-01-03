@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+import PyQt5 as qt
+
 import badwidgets as widgets
 import badmodels as models
 
@@ -13,9 +15,13 @@ import vlc
 import os
 
 # from ui.MainWindow import Ui_MainWindow
-from ui.MainWindow_test import Ui_MainWindow
+from ui.MainWindow import Ui_MainWindow
 
 from downloader import Downloader
+
+# print (os.environ['PATH'])
+# print (os.environ['DYLD_LIBRARY_PATH'])
+# print (os.environ['PYTHONPATH'])
 
 # class BadPlayer(QMainWindow, Ui_MainWindow_test):
 class BadPlayer(QMainWindow, Ui_MainWindow):
@@ -27,7 +33,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		self.config = config
 		self.clickedPL = None
-		self.clickedSong = None
+		self.clickedMusic = None
 		self.firstFillPL = True
 		self.firstFillSG = True
 		self.downloader = Downloader(self)
@@ -35,6 +41,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
+		# print (self.playlistpath)
 		os.makedirs(self.playlistpath, exist_ok=True)
 
 		self.initVLC(self.config['player'])
@@ -42,7 +49,13 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.initUI()
 		self.initMenu()
 
+		self.shortcut = QShortcut(QKeySequence(Qt.Key_MediaPlay), self)
+		self.shortcut.activated.connect(self.test)
+
 		self.show()
+
+	def test(self):
+		print ("Yeah")
 
 	def initUI(self):
 		self.initButton()
@@ -60,13 +73,13 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.fillPlaylistTable()
 		self.playlistTable.setCurrentItem(self.qall)
 
-		self.songTable.itemDoubleClicked.connect(self.musicDoubleClicked)
+		self.musicTable.itemDoubleClicked.connect(self.musicDoubleClicked)
 
 	def initMenu(self):
 		self.actionOpen.triggered.connect(self.OpenFile)
 		self.actionExit.triggered.connect(sys.exit)
 		self.actionAddPlaylist.triggered.connect(self.addPlaylist)
-		self.actionAddMusicFromFile.triggered.connect(self.addSongFromFile)
+		self.actionAddMusicFromFile.triggered.connect(self.addMusic)
 		self.actionOpenDownloader.triggered.connect(self.openDownloader)
 
 	def fillPlaylistTable(self):
@@ -89,29 +102,29 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 
 	def fillMusicTable(self, playlist=None):
-		if playlist.id == 0:
+		if playlist is None or playlist.id == 0:
 			items = self.session.query(models.Song).all()
 		else:
 			playlistfilter = models.Song.playlists.any(models.Playlist.id == self.currentPlaylist.id)
 			items = self.session.query(models.Song).filter(playlistfilter)
 
-		self.songTable.setColumnCount(1)
-		self.songTable.setColumnCount(1)
-		# self.songTable.setColumnWidth(0, 200)
-		self.songTable.horizontalHeader().setStretchLastSection(True)
-		self.songTable.clear()
-		if playlist.id == 0:
-			self.songTable.setRowCount(len(items))
+		self.musicTable.setColumnCount(1)
+		self.musicTable.setColumnCount(1)
+		# self.musicTable.setColumnWidth(0, 200)
+		self.musicTable.horizontalHeader().setStretchLastSection(True)
+		self.musicTable.clear()
+		if playlist is None or playlist.id == 0:
+			self.musicTable.setRowCount(len(items))
 		else:
-			self.songTable.setRowCount(len(playlist.dbitem.songs))
+			self.musicTable.setRowCount(len(playlist.dbitem.songs))
 
 		for i, item in enumerate(items):
 			qitem = widgets.TableWidgetItem(str(item), id=item.id, dbitem=item)
-			self.songTable.setItem(i, 0, qitem)
+			self.musicTable.setItem(i, 0, qitem)
 			if i == 0:
-				self.songTable.setCurrentItem(qitem)
+				self.musicTable.setCurrentItem(qitem)
 
-		self.songTable.setHorizontalHeaderLabels(("Title",))
+		self.musicTable.setHorizontalHeaderLabels(("Title",))
 
 	def initButton(self):
 		self.getIcons()
@@ -136,12 +149,12 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	def setupButton(self, button, funct=None, icon=None, text=None, style=True):
 		if funct is not None:
 			button.clicked.connect(funct)
-		if icon is not None:
-			button.setIcon(icon)
-			button.setIconSize(QSize(50, 50))
-		if style is True:
-			button.setFlat(True)
-			button.setStyleSheet("color: black; background-color: black")
+		# if icon is not None:
+		# 	button.setIcon(icon)
+		# 	button.setIconSize(QSize(50, 50))
+		# if style is True:
+			# button.setFlat(True)
+			# button.setStyleSheet("color: black; background-color: black")
 
 	def initVLC(self, config):
 		self.instance = vlc.Instance()
@@ -155,6 +168,17 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		logging.getLogger("mpgatofixed32").setLevel(logging.NOTSET)		
 		logging.getLogger("core vout").setLevel(logging.NOTSET)
 
+		gifpath = "{}/images/player/animation.gif".format(os.path.realpath(os.path.dirname(__file__)))
+		self.labelframe = QLabel(self)
+		self.labelframe.setScaledContents(True)
+		self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+		self.anim = QMovie(gifpath)
+		self.labelframe.setMovie(self.anim)
+		self.framelayout.addWidget(self.labelframe)
+		self.labelframe.hide()
+		self.musicplayed = False
+		# anim.start()
+
 	def initDB(self, config):
 		self.session = models.createSession(config)
 	# def setupUi(self):
@@ -165,7 +189,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 	def openDownloader(self):
 		self.downloader.show()
-		print ('Open downloader')
 
 	def getIcons(self):
 		self.playicon = self.getImage('player', 'play.png')
@@ -190,13 +213,13 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	# 	print ("ShowHide")
 	# 	if self.tablesHided is False:
 	# 		self.playlistTable.hide()
-	# 		self.songTable.hide()
+	# 		self.musicTable.hide()
 	# 		self.tablesHided = True
 	# 		self.resize((self.currentwidth), self.currentheight)
 	# 		self.resize((self.currentwidth - 400), self.currentheight)
 	# 	else:
 	# 		self.playlistTable.show()
-	# 		self.songTable.show()
+	# 		self.musicTable.show()
 	# 		self.resize(self.currentwidth + 50, self.currentheight)
 	# 		self.tablesHided = False
 
@@ -213,36 +236,46 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		if self.mediaplayer.is_playing():
 			self.mediaplayer.pause()
-			self.playButton.setIcon(self.playicon)
+			# self.playButton.setIcon(self.playicon)
 			self.playButton.setText("Play")
 			self.isPaused = True
+			if self.musicplayed is True:
+				self.anim.stop()
+				self.musicplayed = False
 		else:
 			if self.mediaplayer.play() == -1:
 				self.OpenFile()
 				return
 			self.mediaplayer.play()
-			self.playButton.setIcon(self.pauseicon)
+			# self.playButton.setIcon(self.pauseicon)
 			self.playButton.setText("Pause")
 			self.timer.start()
 			self.isPaused = False
+			if self.musicplayed is False:
+				self.anim.start ()
+				self.musicplayed = True
+
 
 	def Stop(self):
 		"""Stop player
 		"""
 		self.mediaplayer.stop()
-		self.playButton.setIcon(self.playicon)
+		# self.playButton.setIcon(self.playicon)
 
-	def addSongFromFile(self):
-		dialog = widgets.AddSongDialog(self)
-		ok, filename, playlistname, playlistid = dialog.get()
+	def addMusic(self):
+		dialog = widgets.AddMusicDialog(self)
+		ok, filename, playlistname, playlistid, index, url = dialog.get()
 		# print ("Ok :", ok)
 		# print ("filename :", filename)
 		# print ("playlistname :", playlistname)
 		# print ("playlistid :", playlistid)
 		# print ("self.playlistpath :", self.playlistpath)
 		if ok:
-			models.add_song(self.session, filename, playlistname, playlistid, self.playlistpath)
-			self.fillMusicTable(self.currentPlaylist)
+			if index == 0: # From File
+				models.add_music(self.session, filename, playlistname, playlistid, self.playlistpath)
+				self.fillMusicTable(self.currentPlaylist)
+			elif index == 1: # From URL
+				self.downloader.download(url, playlistname, playlistid)
 
 	def addPlaylist(self):
 		dialog = widgets.AddPlaylistDialog(self)
@@ -252,7 +285,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 			path = self.playlistpath + '/' + name
 			newPlaylist = models.Playlist(name=name)
 			os.makedirs(self.playlistpath + '/' + name, exist_ok=True)
-			print (newPlaylist)
+			# print (newPlaylist)
 			self.session.add(newPlaylist)
 			self.session.commit()
 			self.fillPlaylistTable()
@@ -287,6 +320,28 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 			self.mediaplayer.set_hwnd(self.videoframe.winId())
 		elif sys.platform == "darwin": # for MacOS
 			self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
+
+		extention = os.path.splitext(filename)[1][1:]
+		if extention in ("mp3", "wav"):
+			self.videoframe.hide()
+			self.labelframe.show()
+			self.musicplayed = True
+			# gifpath = "{}/images/player/animation.gif".format(os.path.realpath(os.path.dirname(__file__)))
+			# self.labelframe = QLabel(self)
+			# self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+			# anim = QMovie(gifpath)
+			# self.labelframe.setMovie(anim)
+			# self.framelayout.addWidget(self.labelframe)
+			self.anim.start()
+			# print ("Animation started")
+		else:
+			self.musicplayed = False
+			self.labelframe.hide()
+			self.videoframe.show()
+
+			# self.videoframe.
+		# print (self.media.get_duration())
+		self.totalTime.setText(self.getTimeString(self.media.get_duration()))
 		self.PlayPause()
 		self.setStatus("Media added to player")
 
@@ -341,21 +396,20 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 	## Need play/pause for the Space key event
 	def keyPressEvent(self, e):
-		# print ("Key press event : ", e.text())
-		self.statusBar().showMessage(e.text() + ' key was pressed')
+		if e.text() == ' ':
+			self.PlayPause()
 		if e.key() == Qt.Key_Escape:
 			self.close()
 
 	def valueChanged(self, t):
 		self.positionvalue = t
-		# print (t)
 
 	def resizeEvent(self, resizeEvent):
 		self.currentwidth = resizeEvent.size().width()
 		self.currentheight = resizeEvent.size().height()
 
 		# self.playlistTable.setColumnWidth(0, self.playlistTable.geometry().width())
-		# self.songTable.setColumnWidth(0, self.songTable.geometry().width())
+		# self.musicTable.setColumnWidth(0, self.musicTable.geometry().width())
 
 		# self.playlistTable.resize(self.playlistTable.geometry().width())
 		# print ("The window has been resized - ", self.currentwidth, self.currentheight)

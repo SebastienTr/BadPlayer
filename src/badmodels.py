@@ -66,13 +66,13 @@ class Song(Base):
 	def __str__(self):
 		return self.name
 
-def add_song(session, filename, playlistname, playlistid, playlistpath):
+def add_music(session, filename, playlistname, playlistid, playlistpath, source="File"):
 	name = os.path.basename(filename)
 	namewithoutext = os.path.splitext(name)[0]
 	finalpath = '{}/{}/{}'.format(playlistpath, playlistname, name)
 	# print (filename, '--->', finalpath)
 	copyfile(filename, finalpath)
-	newsong = Song(name=namewithoutext, source="File", localpath=name)
+	newsong = Song(name=namewithoutext, source=source, localpath=name)
 	playlist = session.query(Playlist).get(playlistid)
 	newsong.playlists.append(playlist)
 	session.add(newsong)

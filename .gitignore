@@ -93,6 +93,7 @@ ENV/
 
 # dev local files
 .local/
+local/
 
 # Playlists
 playlists
