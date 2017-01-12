@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import badmodels as models
-import random
-from ui.AddFileDialog import Ui_AddFileDialog
 
-import os
+from app.ui.AddFileDialog import Ui_AddFileDialog
+import app.badmodels as models
+
+import random
 import sys
+import os
 
 # class ListWidgetItem(QListWidgetItem):
 # 	def __init__(self, item, id=0, dbitem=None):

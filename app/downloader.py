@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from ui.Downloader import Ui_Downloader
+from app.ui.Downloader import Ui_Downloader
 import sys
 import os
 import threading
@@ -11,7 +11,7 @@ import urllib.request # just for test
 
 import youtube_dl
 
-import badmodels as models
+import app.badmodels as models
 
 import time
 

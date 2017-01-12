@@ -5,25 +5,29 @@ from PyQt5.QtCore import *
 
 import PyQt5 as qt
 
-import badwidgets as widgets
-import badmodels as models
+import app.badwidgets as widgets
+import app.badmodels as models
 
 import logging
 import yaml
 import sys
+import sip
+# import app.vlc as vlc
 import vlc
 import os
 
 # from ui.MainWindow import Ui_MainWindow
-from ui.MainWindow import Ui_MainWindow
+from app.ui.MainWindow import Ui_MainWindow
 
-from downloader import Downloader
+from app.downloader import Downloader
 
 # print (os.environ['PATH'])
 # print (os.environ['DYLD_LIBRARY_PATH'])
 # print (os.environ['PYTHONPATH'])
 
 # class BadPlayer(QMainWindow, Ui_MainWindow_test):
+os.environ['VLC_PLUGIN_PATH']='/Applications/VLC.app/Contents/MacOS/plugins'
+
 class BadPlayer(QMainWindow, Ui_MainWindow):
 	"""docstring for BadPlayer"""
 	def __init__(self, config):
@@ -41,7 +45,12 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		self.setupUi(self)
 
-		self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
+		homepath = os.path.expanduser("~")
+		self.playlistpath = os.path.join(homepath, "Music/BadPlayer/playlists")
+		self.dbpath = os.path.join(homepath, "Music/BadPlayer/db.sqlite3")
+
+		# self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
+		# self.playlistpath = "~/Music/BadPlayer/playlists"
 		print (self.playlistpath)
 		os.makedirs(self.playlistpath, exist_ok=True)
 
@@ -169,7 +178,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		logging.getLogger("mpgatofixed32").setLevel(logging.NOTSET)		
 		logging.getLogger("core vout").setLevel(logging.NOTSET)
 
-		gifpath = "{}/images/player/animation.gif".format(os.path.realpath(os.path.dirname(__file__)))
+		gifpath = "app/images/player/animation.gif"
 		self.labelframe = QLabel(self)
 		self.labelframe.setScaledContents(True)
 		self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -181,7 +190,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		# anim.start()
 
 	def initDB(self, config):
-		self.session = models.createSession(config)
+		self.session = models.createSession(self.dbpath)
 	# def setupUi(self):
 	# 	# self.widget = QWidget(self)
 	# 	# self.setCentralWidget(self.widget)
@@ -417,8 +426,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 def loadConfig():
 	config = None
-	# print ('###########', "{}/config.yml".format(os.path.realpath(os.path.dirname(__file__))))
-	configpath = "{}/config.yml".format(os.path.realpath(os.path.dirname(__file__)))
+	configpath = "./config.yml"
 	with open(configpath, 'r') as stream:
 		try:
 			config = yaml.load(stream)

@@ -79,16 +79,16 @@ def add_music(session, filename, playlistname, playlistid, playlistpath, source=
 	session.commit()
 
 
-def createEngine(config):
-	dbpath = "{}/{}".format(os.path.realpath(os.path.dirname(__file__)), config['path'])
+def createEngine(dbpath):
+	# dbpath = "{}/{}".format(os.path.realpath(os.path.dirname(__file__)), config['path'])
 	sqlitepath = "sqlite:///{}".format(dbpath)
 
 	engine = create_engine(sqlitepath)
 	Base.metadata.create_all(engine)
 	return engine
 
-def createSession(config):
-	engine = createEngine(config)
+def createSession(dbpath):
+	engine = createEngine(dbpath)
 	# engine = create_engine('sqlite:///' + config["path"])
 	Session = sessionmaker(bind=engine)
 	session = Session()

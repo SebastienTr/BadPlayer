@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from badplayer import main
+from app.badplayer import main
 
 if __name__ == '__main__':
 	main()
