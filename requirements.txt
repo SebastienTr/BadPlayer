@@ -1,0 +1,8 @@
+PyQt5
+sqlalchemy
+pyyaml
+eyed3
+youtube_dl
+sip
+py2app
+python-vlc
