@@ -94,7 +94,5 @@ ENV/
 # dev local files
 .local/
 local/
-
-# Playlists
-playlists
-db.sqlite3
+TUTO
+compile_ui_files.sh
