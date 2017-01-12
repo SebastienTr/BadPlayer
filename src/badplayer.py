@@ -29,6 +29,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	def __init__(self, config):
 		super(BadPlayer, self).__init__()
 		self.title = 'Bad Player'
+		# QEvent.accept()
 		# self.parent = parent
 
 		self.config = config
@@ -41,7 +42,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
-		# print (self.playlistpath)
+		print (self.playlistpath)
 		os.makedirs(self.playlistpath, exist_ok=True)
 
 		self.initVLC(self.config['player'])

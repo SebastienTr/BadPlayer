@@ -13,7 +13,9 @@ def read(fname):
 
 APP = ['src/main.py']
 DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
+OPTIONS = {
+            'argv_emulation': True,
+            'iconfile': 'src/images/app.icn'}
 
 setup(
 	name="Bad Player",

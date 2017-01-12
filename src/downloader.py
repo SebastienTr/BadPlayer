@@ -21,12 +21,12 @@ fProgressCounter = 0.0
 
 # finish = False
 
-class TableWidgetItem(QTableWidgetItem):
-	def __init__(self, item, id=0, dbitem=None):
-		super().__init__(item)
-		self.id = id
-		self.item = item
-		self.dbitem = dbitem
+# class TableWidgetItem(QTableWidgetItem):
+# 	def __init__(self, item, id=0, dbitem=None):
+# 		super().__init__(item)
+# 		self.id = id
+# 		self.item = item
+# 		self.dbitem = dbitem
 
 class Downloader(QMainWindow, Ui_Downloader):
 	"""docstring for Downloader"""
@@ -92,7 +92,8 @@ class Downloader(QMainWindow, Ui_Downloader):
 
 	def done(self, info):
 		webmFile = '{}/{}-{}.{}'.format(self.parent.playlistpath, self.formatPath(info['title']), info['id'], 'webm')
-		while os.path.exists(webmFile) is True:
+		m4aFile = '{}/{}-{}.{}'.format(self.parent.playlistpath, self.formatPath(info['title']), info['id'], 'm4a')
+		while os.path.exists(webmFile) is True or os.path.exists(m4aFile) is True:
 			time.sleep(1)
 		print ("ok it's really done now !!!")
 		filename = '{}/{}-{}.{}'.format(self.parent.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
@@ -110,7 +111,9 @@ class sigHandling(QObject):
 
 	@pyqtSlot()
 	def dlDone(self):
-		print("DOOOONNEEEE !!!!!!!!!!!!!!!!")
+		# webmFile = '{}/{}-{}.{}'.format(self.parent.playlistpath, self.formatPath(info['title']), self.info['id'], 'webm')
+		# while os.path.exists(webmFile) is True:
+		# 	time.sleep(1)
 		hWindow.pbar.setValue(100)
 		hWindow.done(self.info)
 
@@ -163,6 +166,7 @@ class sigHandling(QObject):
 			# finish = False
 			self.info = ydl.extract_info(url, download=False)
 			# hWindow.initDL(self.info)
+			#### AJOUTER UN TRY CATCH RAISE
 			ydl.download([url])
 			# print (info)
 
