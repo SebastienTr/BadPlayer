@@ -3,8 +3,5 @@ database:
     user: "user"
     password: "password"
 
-# browser:
-#     playlistpath: "./playlists"
-
 player:
     default_volume: 100

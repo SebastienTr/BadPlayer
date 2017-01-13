@@ -45,9 +45,10 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		self.setupUi(self)
 
-		homepath = os.path.expanduser("~")
-		self.playlistpath = os.path.join(homepath, "Music/BadPlayer/playlists")
-		self.dbpath = os.path.join(homepath, "Music/BadPlayer/db.sqlite3")
+		self.homepath = os.path.expanduser("~")
+		self.apppath = os.path.join(self.homepath, "Music/BadPlayer")
+		self.playlistpath = os.path.join(self.homepath, "Music/BadPlayer/playlists")
+		self.dbpath = os.path.join(self.homepath, "Music/BadPlayer/db.sqlite3")
 
 		# self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
 		# self.playlistpath = "~/Music/BadPlayer/playlists"

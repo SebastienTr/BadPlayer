@@ -34,3 +34,10 @@ There is a lot of things to improve but the basis is done.
 
 ###Contact
 c2ViYXN0aWVudHJlaWxsZUBnbWFpbC5jb20=
+
+
+---------------------
+Il faudrait gerer les playlist comme un object Library, donc importer une playlist qui correspond à un path vers un dosier /libraryName, avec dedans :
+	- /libraryName/db.sqlite3
+	- /libraryName/playlists/
+Ça permetrais de reconsidérer la manipulation des musiques en bases et sur le disque.
