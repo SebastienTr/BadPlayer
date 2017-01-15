@@ -67,11 +67,14 @@
                  </size>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">background-color:#481616; color:white</string>
+                 <string notr="true">background-color:#481616; color:white;</string>
                 </property>
                 <property name="editTriggers">
                  <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
+                <attribute name="horizontalHeaderStretchLastSection">
+                 <bool>true</bool>
+                </attribute>
                 <attribute name="verticalHeaderVisible">
                  <bool>false</bool>
                 </attribute>
@@ -80,11 +83,14 @@
               <item>
                <widget class="QTableWidget" name="musicTable">
                 <property name="styleSheet">
-                 <string notr="true">background-color:#481616; color:white</string>
+                 <string notr="true">background-color:#481616; color:white;</string>
                 </property>
                 <property name="editTriggers">
                  <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
+                <attribute name="horizontalHeaderStretchLastSection">
+                 <bool>true</bool>
+                </attribute>
                 <attribute name="verticalHeaderVisible">
                  <bool>false</bool>
                 </attribute>

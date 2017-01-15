@@ -1,10 +1,12 @@
+from PyQt5.QtCore import QObject
+
 import app.badwidgets as widgets
 import app.badmodels as models
 
 import os
 import shutil
 
-class BadLibrary(object):
+class BadLibrary(QObject):
 	"""A BadLibrary is a path to a folder that contain a database and a playlists folder"""
 	def __init__(self, path, parent):
 		self.path = path
@@ -19,6 +21,7 @@ class BadLibrary(object):
 		os.makedirs(self.downloadpath, exist_ok=True)
 
 		self.refresh()
+		self.printMe()
 
 	def refresh(self):
 		self.playlists = list()
@@ -57,6 +60,19 @@ class BadLibrary(object):
 		self.session.commit()
 		playlist = BadPlaylist(newPlaylist, self)
 		self.playlists.append(playlist)
+
+	def printMe(self):
+		print ('| Library name : ', os.path.basename(self.path))
+		print ('| Library path : ', self.path)
+		for playlist in self.playlists:
+			if playlist.name != "All":
+				print ('__|')
+				print ('  |___ {} ({})'.format(playlist.name, len(playlist.medias)))
+				for media in playlist.medias:
+					rest = ''
+					if len(media.name) > 80:
+						rest = '...'
+					print ('    | - {}{}'.format(media.name[:80], rest))
 
 
 		

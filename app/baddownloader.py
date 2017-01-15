@@ -15,18 +15,45 @@ import app.badmodels as models
 
 import time
 
-dlThread = 0
+dlThread = dict()
 hWindow = 0
 fProgressCounter = 0.0
 info = None
 
 class DLItem(QObject):
 	"""This class is a representation of a downloading element"""
-	def __init__(self, parent, url=None):
+	def __init__(self, parent, url=None, id=0):
 		super(DLItem, self).__init__()
 		self.url = url
 		self.parent = parent
-		
+		self.id = id
+
+		self.hSignals = sigHandling(self.id)
+		self.hSignals.dlProgress_update.connect(self.hSignals.pbar_incrementer)
+		self.hSignals.dlProgress_done.connect(self.hSignals.dlDone)
+
+		rowPosition = self.parent.tableWidget.rowCount()
+		self.parent.tableWidget.insertRow(rowPosition)
+
+		self.sizeitem = QTableWidgetItem('')
+		self.progressitem = QTableWidgetItem('')
+		self.timeitem = QTableWidgetItem('')
+		self.titleitem = QTableWidgetItem('')
+		self.speeditem = QTableWidgetItem('')
+		self.urlitem = QTableWidgetItem(url)
+
+		self.parent.tableWidget.setItem(rowPosition, 0, self.titleitem)
+		self.parent.tableWidget.setItem(rowPosition, 1, self.sizeitem)
+		self.parent.tableWidget.setItem(rowPosition, 2, self.progressitem)
+		self.parent.tableWidget.setItem(rowPosition, 3, self.speeditem)
+		self.parent.tableWidget.setItem(rowPosition, 4, self.timeitem)
+		self.parent.tableWidget.setItem(rowPosition, 5, self.urlitem)
+
+		global dlThread
+
+		dlThread[self.id] = threading.Thread(target=self.hSignals.runDL,args=(self.url,self.parent.parent.library.playlistpath))
+		dlThread[self.id].start()
+
 
 class Downloader(QMainWindow, Ui_Downloader):
 	"""docstring for Downloader"""
@@ -38,58 +65,36 @@ class Downloader(QMainWindow, Ui_Downloader):
 		hWindow = self
 
 		self.setupUi(self)
-		self.tableWidget.horizontalHeader().setStretchLastSection(True)
+		# self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+		self.items = list()
+		self.lastId = 0
 
 	def download(self, url, playlist):
 		self.playlist = playlist
 		self.show()
 
-		if url == "":
+		if url == "" or playlist is None:
 			QMessageBox.information(self, "Empty URL",
 					"Please enter the URL of the file you want to download.")
 			return
 
-		global dlThread
+		self.lastId += 1
+		dlitem = DLItem(self, url=url, id=self.lastId)
+		self.items.append(dlitem)
 
-		hSignals = sigHandling()
-		hSignals.dlProgress_update.connect(hSignals.pbar_incrementer)
-		hSignals.dlProgress_done.connect(hSignals.dlDone)
-
-		rowPosition = self.tableWidget.rowCount()
-		self.tableWidget.insertRow(rowPosition)
-
-		self.sizeitem = QTableWidgetItem('')
-		self.progressitem = QTableWidgetItem('')
-		self.timeitem = QTableWidgetItem('')
-		self.titleitem = QTableWidgetItem('')
-		self.speeditem = QTableWidgetItem('')
-
-		self.tableWidget.setItem(rowPosition, 0, self.titleitem)
-		self.tableWidget.setItem(rowPosition, 1, self.sizeitem)
-		self.tableWidget.setItem(rowPosition, 2, self.progressitem)
-		self.tableWidget.setItem(rowPosition, 3, self.speeditem)
-		self.tableWidget.setItem(rowPosition, 4, self.timeitem)
-
-		self.tableWidget.setItem(0, 5, QTableWidgetItem(url))
-
-		# self.bttDL.setEnabled(False)
-		dlThread = threading.Thread(target=hSignals.runDL,args=(url,self.parent.library.playlistpath))
-		dlThread.start()
 		return
 
-	def initDL(self, info):
-		pass
-		# self.sizeitem.setText("42")
-		# self.titleitem.setText(info['title'])
-		# self.progressitem.setText("0%")
-
-	def pbarIncValue(self, val):
+	def pbarIncValue(self, val, id):
 		global fProgressCounter, info
-		self.progressitem.setText(info['_percent_str'])
-		self.sizeitem.setText(info['_total_bytes_str'] if info['_total_bytes_str'] is not None else info['_total_bytes_estimate_str'])
-		self.speeditem.setText(info['_speed_str'])
-		self.timeitem.setText(info['_eta_str'])
-		self.titleitem.setText(os.path.basename(info['filename']))
+		item = self.getById(id)
+
+		if item is not None:
+			item.progressitem.setText(info['_percent_str'])
+			item.sizeitem.setText(info['_total_bytes_str'] if info['_total_bytes_str'] is not None else info['_total_bytes_estimate_str'])
+			item.speeditem.setText(info['_speed_str'])
+			item.timeitem.setText(info['_eta_str'])
+			item.titleitem.setText(os.path.basename(info['filename']))
 
 		if self.pbar.value() >= 100:
 			# self.dlProgress_done.emit()
@@ -101,6 +106,12 @@ class Downloader(QMainWindow, Ui_Downloader):
 			fProgressCounter += val
 		else:
 			fProgressCounter += val
+
+	def getById(self, id):
+		for item in self.items:
+			if item.id == id:
+				return item
+		return None
 
 	def formatPath(self, path):
 		path = path.replace('|', '_')
@@ -124,13 +135,13 @@ class sigHandling(QObject):
 	dlProgress_done = pyqtSignal()
 	info = None
 
-	def __init__(self):
+	def __init__(self, id):
 		super().__init__()
-
+		self.id = id
 
 	@pyqtSlot(float)
 	def pbar_incrementer(self, val):
-		hWindow.pbarIncValue(val)
+		hWindow.pbarIncValue(val, self.id)
 
 	@pyqtSlot()
 	def dlDone(self):
@@ -162,32 +173,41 @@ class sigHandling(QObject):
 			}],
 			'audioformat': "mp3",      # convert to mp3 
 			'outtmpl': playlistpath + '/%(title)s-%(id)s.%(ext)s',  # name the file the ID of the video
-			'logger': MyLogger(0),
+			'logger': MyLogger(self.id),
 			'progress_hooks': [my_hook],
 		}
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-			try:
-				self.info = ydl.extract_info(url, download=False)
-				hWindow.initDL(self.info)
-				ydl.download([url])
-
-			except Exception as e:
-				print (e)
+			def tryit():
+				try:
+					self.info = ydl.extract_info(url, download=False)
+					# hWindow.initDL(self.info)
+					try:
+						ydl.download([url])
+					except Exception as edl:
+						print ("-- EXCEPTON EXCEPTON EXCEPTON EXCEPTON EXCEPTON ")
+						print (edl)
+						print ("--------------")
+				except Exception as einfo:
+					print ("EXCEPTON EXCEPTON EXCEPTON EXCEPTON EXCEPTON ")
+					print (einfo)
+					print ("--------------")
+					tryit()
+			tryit()
 		return
 
-
-class MyLogger(object):
+class MyLogger(QObject):
 	def __init__(self, id):
+		super().__init__()
 		self.id = id
 
 	def debug(self, msg):
-		print ("DEBUG", self.id, '\n', msg)
+		print ("DEBUG", self.id, ':', msg)
 		pass
 
 	def warning(self, msg):
-		print ("WARNING", self.id, '\n', msg)
+		print ("WARNING", self.id, ':', msg)
 		pass
 
 	def error(self, msg):
-		print ("ERROR", self.id, '\n', msg)
+		print ("ERROR", self.id, ':', msg)
 		pass
