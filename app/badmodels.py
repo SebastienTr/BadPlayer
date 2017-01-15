@@ -15,7 +15,6 @@ songsinplaylist = Table('songsinplaylist', Base.metadata,
 	Column('song_id', ForeignKey('song.id'), primary_key=True)
 )
 
-
 class Playlist(Base):
 	"""Playlist entity"""
 
@@ -41,16 +40,6 @@ class PlaylistListModel(QAbstractListModel):
     def refresh(self):
         self.playlists = self.session.query(Playlist).all()
 
-    # def data(self, index, role):
-    #     users = get_users(self.session)
-
-    #     # Only for debug
-    #     print(users)
-
-    #     if role == QtCore.Qt.DisplayRole:
-    #         value = users[index.row()]
-    #         return "%s : %s" % (value.id_, value.name)
-
 class Song(Base):
 	"""Song entity"""
 
@@ -65,19 +54,6 @@ class Song(Base):
 
 	def __str__(self):
 		return self.name
-
-def add_music(session, filename, playlistname, playlistid, playlistpath, source="File"):
-	name = os.path.basename(filename)
-	namewithoutext = os.path.splitext(name)[0]
-	finalpath = '{}/{}/{}'.format(playlistpath, playlistname, name)
-	# print (filename, '--->', finalpath)
-	copyfile(filename, finalpath)
-	newsong = Song(name=namewithoutext, source=source, localpath=name)
-	playlist = session.query(Playlist).get(playlistid)
-	newsong.playlists.append(playlist)
-	session.add(newsong)
-	session.commit()
-
 
 def createEngine(dbpath):
 	# dbpath = "{}/{}".format(os.path.realpath(os.path.dirname(__file__)), config['path'])

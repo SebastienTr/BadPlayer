@@ -16,11 +16,14 @@ import os
 # 		self.dbitem = dbitem
 
 class TableWidgetItem(QTableWidgetItem):
-	def __init__(self, item, id=0, dbitem=None):
-		super().__init__(item)
-		self.id = id
-		self.item = item
-		self.dbitem = dbitem
+	def __init__(self, item):
+		super().__init__(item.name)
+		self.id = item.id
+		self.name = item.name
+		self.dbitem = item.dbitem
+		self.libraryitem = item
+
+		item.setTableItem(self)
 
 # class ExtendedQLabel(QLabel):
 # 	def __init__(self, parent):
@@ -143,7 +146,7 @@ class AddPlaylistDialog(QWidget):
 # 	def getText(self):
 # 		return self.__text
 
-class AddMusicDialog(Ui_AddFileDialog):
+class AddMediaDialog(Ui_AddFileDialog):
 	def __init__(self, parent):
 		Ui_AddFileDialog.__init__(self)
 		self.dialog = QDialog()
@@ -155,7 +158,7 @@ class AddMusicDialog(Ui_AddFileDialog):
 		self.setupUi(self.dialog)
 		self.openfilebutton.clicked.connect(self.OpenFile)
 
-		playlistsItems = self.parent.session.query(models.Playlist).all()
+		playlistsItems = self.parent.library.getPlaylists()
 		for item in playlistsItems:
 			self.playlistBox.addItem(item.name, userData=item.id)
 

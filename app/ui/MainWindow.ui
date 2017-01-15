@@ -13,6 +13,12 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:#301010;</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -60,6 +66,9 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color:#481616; color:white</string>
+                </property>
                 <property name="editTriggers">
                  <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
@@ -70,6 +79,9 @@
               </item>
               <item>
                <widget class="QTableWidget" name="musicTable">
+                <property name="styleSheet">
+                 <string notr="true">background-color:#481616; color:white</string>
+                </property>
                 <property name="editTriggers">
                  <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
@@ -102,6 +114,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">color:white</string>
+              </property>
               <property name="text">
                <string>00:00:00</string>
               </property>
@@ -128,6 +143,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">color:white</string>
+              </property>
               <property name="text">
                <string>00:00:00</string>
               </property>
@@ -151,6 +169,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">color:white</string>
+              </property>
               <property name="text">
                <string>Play</string>
               </property>
@@ -169,6 +190,9 @@
                 <width>80</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:white</string>
               </property>
               <property name="text">
                <string>Stop</string>
@@ -243,7 +267,7 @@
     <addaction name="separator"/>
     <addaction name="actionAddPlaylist"/>
     <addaction name="separator"/>
-    <addaction name="actionAddMusicFromFile"/>
+    <addaction name="actionAddMedia"/>
     <addaction name="separator"/>
     <addaction name="actionOpenDownloader"/>
     <addaction name="separator"/>
@@ -262,7 +286,7 @@
     <string>Add playlist</string>
    </property>
   </action>
-  <action name="actionAddMusicFromFile">
+  <action name="actionAddMedia">
    <property name="text">
     <string>Add music from file or url</string>
    </property>

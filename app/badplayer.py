@@ -7,25 +7,20 @@ import PyQt5 as qt
 
 import app.badwidgets as widgets
 import app.badmodels as models
+from app.badlibrary import BadLibrary
+from app.playerinterface import PlayerInterface
 
-import logging
+# import logging
 import yaml
 import sys
 import sip
-# import app.vlc as vlc
-import vlc
 import os
 
 # from ui.MainWindow import Ui_MainWindow
 from app.ui.MainWindow import Ui_MainWindow
 
-from app.downloader import Downloader
+from app.baddownloader import Downloader
 
-# print (os.environ['PATH'])
-# print (os.environ['DYLD_LIBRARY_PATH'])
-# print (os.environ['PYTHONPATH'])
-
-# class BadPlayer(QMainWindow, Ui_MainWindow_test):
 os.environ['VLC_PLUGIN_PATH']='/Applications/VLC.app/Contents/MacOS/plugins'
 
 class BadPlayer(QMainWindow, Ui_MainWindow):
@@ -46,31 +41,20 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		self.homepath = os.path.expanduser("~")
-		self.apppath = os.path.join(self.homepath, "Music/BadPlayer")
-		self.playlistpath = os.path.join(self.homepath, "Music/BadPlayer/playlists")
-		self.dbpath = os.path.join(self.homepath, "Music/BadPlayer/db.sqlite3")
+		self.librarypath = os.path.join(self.homepath, "Music/BadPlayer")
+		self.library =  BadLibrary(self.librarypath, self)
+		os.makedirs(self.library.playlistpath, exist_ok=True)
 
-		# self.playlistpath = os.path.realpath(os.path.dirname(os.path.realpath("{}/../".format(__file__))) + '/' + config['browser']['playlistpath'])
-		# self.playlistpath = "~/Music/BadPlayer/playlists"
-		print (self.playlistpath)
-		os.makedirs(self.playlistpath, exist_ok=True)
+		# self.initVLC(self.config['player'])
+		self.player = PlayerInterface(self.config['player'], self)
 
-		self.initVLC(self.config['player'])
-		self.initDB(self.config['database'])
 		self.initUI()
 		self.initMenu()
 
-		self.shortcut = QShortcut(QKeySequence(Qt.Key_MediaPlay), self)
-		self.shortcut.activated.connect(self.test)
-
 		self.show()
-
-	def test(self):
-		print ("Yeah")
 
 	def initUI(self):
 		self.initButton()
-
 		self.initTables()
 
 		self.timer = QTimer(self)
@@ -79,10 +63,10 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.setWindowTitle(self.title)
 
 	def initTables(self):
-		self.currentPlaylist = None
 		self.playlistTable.currentItemChanged.connect(self.playListChanged)
 		self.fillPlaylistTable()
-		self.playlistTable.setCurrentItem(self.qall)
+		self.playlistTable.setCurrentItem(self.library.itemall.tableItem)
+		self.currentPlaylist = self.library.itemall.tableItem
 
 		self.musicTable.itemDoubleClicked.connect(self.musicDoubleClicked)
 
@@ -90,47 +74,39 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.actionOpen.triggered.connect(self.OpenFile)
 		self.actionExit.triggered.connect(sys.exit)
 		self.actionAddPlaylist.triggered.connect(self.addPlaylist)
-		self.actionAddMusicFromFile.triggered.connect(self.addMusic)
+		self.actionAddMedia.triggered.connect(self.addMedia)
 		self.actionOpenDownloader.triggered.connect(self.openDownloader)
 
+	## this function should be externalized
 	def fillPlaylistTable(self):
-		items = self.session.query(models.Playlist).all()
+		playlists = self.library.getPlaylists()
+		# print (playlists)
 
 		self.playlistTable.setColumnCount(1)
-		# self.playlistTable.setColumnWidth(0, 200)
 		self.playlistTable.clear()
-		self.playlistTable.setRowCount(len(items) + 1)
+		self.playlistTable.setRowCount(len(playlists))
 		self.playlistTable.horizontalHeader().setStretchLastSection(True)
 
-		self.qall = widgets.TableWidgetItem('All')
-		self.playlistTable.setItem(0, 0, self.qall)
-		for i, item in enumerate(items):
-			# print ('fill ', item.id, item)
-			qitem = widgets.TableWidgetItem(str(item), id=item.id, dbitem=item)
-			self.playlistTable.setItem(i + 1, 0, qitem)
+		for i, playlist in enumerate(playlists):
+			# print ('fill ', playlist.id, playlist.name)
+			qitem = widgets.TableWidgetItem(playlist)
+			self.playlistTable.setItem(i, 0, qitem)
 
 		self.playlistTable.setHorizontalHeaderLabels(("Name",))
 
-
-	def fillMusicTable(self, playlist=None):
-		if playlist is None or playlist.id == 0:
-			items = self.session.query(models.Song).all()
-		else:
-			playlistfilter = models.Song.playlists.any(models.Playlist.id == self.currentPlaylist.id)
-			items = self.session.query(models.Song).filter(playlistfilter)
+	def fillMusicTable(self, selectedPlaylist=None):
+		if selectedPlaylist is None:
+			selectedPlaylist = self.currentPlaylist
+		medias = selectedPlaylist.libraryitem.getMedias()
 
 		self.musicTable.setColumnCount(1)
 		self.musicTable.setColumnCount(1)
-		# self.musicTable.setColumnWidth(0, 200)
 		self.musicTable.horizontalHeader().setStretchLastSection(True)
 		self.musicTable.clear()
-		if playlist is None or playlist.id == 0:
-			self.musicTable.setRowCount(len(items))
-		else:
-			self.musicTable.setRowCount(len(playlist.dbitem.songs))
+		self.musicTable.setRowCount(len(medias))
 
-		for i, item in enumerate(items):
-			qitem = widgets.TableWidgetItem(str(item), id=item.id, dbitem=item)
+		for i, media in enumerate(medias):
+			qitem = widgets.TableWidgetItem(media)
 			self.musicTable.setItem(i, 0, qitem)
 			if i == 0:
 				self.musicTable.setCurrentItem(qitem)
@@ -154,49 +130,47 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.positionSlider.sliderPressed.connect(self.sliderPressed)
 		self.volumeSlider.setToolTip("Volume")
 		self.volumeSlider.setMaximum(100)
-		self.volumeSlider.setValue(self.mediaplayer.audio_get_volume())
+		self.volumeSlider.setValue(self.player.getAudioVolume())
 		self.volumeSlider.valueChanged.connect(self.setVolume)
+
+	def PlayPause(self):
+		self.player.PlayPause()
+
+	def Stop(self):
+		self.player.mediaplayer.stop()
+
+	def setVolume(self, Volume):
+		"""Set the volume
+		"""
+		self.player.setVolume(Volume)
+
+	def setPosition(self, position):
+		"""Set the position
+		"""
+		# setting the position to where the slider was dragged
+		self.player.setPosition(position / 1000.0)
+
+	def sliderPressed(self, t=-1):
+		self.player.sliderPressed(self.player.positionvalue / 1000.0)
+
+	def valueChanged(self, t):
+		self.player.positionvalue = t
+
+
 
 	def setupButton(self, button, funct=None, icon=None, text=None, style=True):
 		if funct is not None:
 			button.clicked.connect(funct)
-		# if icon is not None:
-		# 	button.setIcon(icon)
-		# 	button.setIconSize(QSize(50, 50))
-		# if style is True:
-			# button.setFlat(True)
-			# button.setStyleSheet("color: black; background-color: black")
+		if icon is not None:
+			button.setIcon(icon)
+			button.setIconSize(QSize(50, 50))
+		if style is True:
+			button.setFlat(True)
+			button.setStyleSheet("color: white; background-color: black")
 
-	def initVLC(self, config):
-		self.instance = vlc.Instance()
-		self.mediaplayer = self.instance.media_player_new()
-		self.mediaplayer.audio_set_volume(config['default_volume'])
-		# self.media_event = self.mediaplayer.event_manager()
-
-		# self.media_event.event_attach(vlc.EventType.MediaPlayerTimeChanged, self.vlc_time_changed, self.mediaplayer)
-
-		logging.getLogger("vlc").setLevel(logging.NOTSET)
-		logging.getLogger("mpgatofixed32").setLevel(logging.NOTSET)		
-		logging.getLogger("core vout").setLevel(logging.NOTSET)
-
-		gifpath = "app/images/player/animation.gif"
-		self.labelframe = QLabel(self)
-		self.labelframe.setScaledContents(True)
-		self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-		self.anim = QMovie(gifpath)
-		self.labelframe.setMovie(self.anim)
-		self.framelayout.addWidget(self.labelframe)
-		self.labelframe.hide()
-		self.musicplayed = False
-		# anim.start()
-
-	def initDB(self, config):
-		self.session = models.createSession(self.dbpath)
-	# def setupUi(self):
-	# 	# self.widget = QWidget(self)
-	# 	# self.setCentralWidget(self.widget)
-	# 	super().setupUi(self)
-	# 	# self.widget.setLayout(self.gridLayout)
+	def getImage(self, folder, filename):
+		icon = QIcon(QPixmap(os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename)))
+		return icon
 
 	def openDownloader(self):
 		self.downloader.show()
@@ -207,98 +181,41 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.stopicon = self.getImage('player', 'stop.png')
 
 	def playListChanged(self, current, prev):
-		# if current is None:
-		# 	self.playlistTable.setCurrentItem(prev)
-		# 	return
-		# print ('Playlist changed', current.id, current.text())
 		self.currentPlaylist = current
-		self.fillMusicTable(current)
+		if current == None:
+			if self.lastplaylistadd is None:
+				self.currentPlaylist = self.library.itemall.tableItem
+			else:
+				self.currentPlaylist = self.lastplaylistadd
+		self.fillMusicTable(self.currentPlaylist)
 
 	def musicDoubleClicked(self, item):
 		self.currentMusic = item
 		music = item.dbitem
-		path = '{}/{}/{}'.format(self.playlistpath, music.playlists[0].name, music.localpath)
-		self.setFile(path)
-
-	# def ShowHide(self):
-	# 	print ("ShowHide")
-	# 	if self.tablesHided is False:
-	# 		self.playlistTable.hide()
-	# 		self.musicTable.hide()
-	# 		self.tablesHided = True
-	# 		self.resize((self.currentwidth), self.currentheight)
-	# 		self.resize((self.currentwidth - 400), self.currentheight)
-	# 	else:
-	# 		self.playlistTable.show()
-	# 		self.musicTable.show()
-	# 		self.resize(self.currentwidth + 50, self.currentheight)
-	# 		self.tablesHided = False
-
-	def sliderPressed(self, t=-1):
-		self.mediaplayer.set_position(self.positionvalue / 1000.0)
-
-	def getImage(self, folder, filename):
-		icon = QIcon(QPixmap(os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename)))
-		return icon
-
-	def PlayPause(self):
-		"""Toggle play/pause status
-		"""
-
-		if self.mediaplayer.is_playing():
-			self.mediaplayer.pause()
-			# self.playButton.setIcon(self.playicon)
-			self.playButton.setText("Play")
-			self.isPaused = True
-			if self.musicplayed is True:
-				self.anim.stop()
-				self.musicplayed = False
-		else:
-			if self.mediaplayer.play() == -1:
-				self.OpenFile()
-				return
-			self.mediaplayer.play()
-			# self.playButton.setIcon(self.pauseicon)
-			self.playButton.setText("Pause")
-			self.timer.start()
-			self.isPaused = False
-			if self.musicplayed is False:
-				self.anim.start ()
-				self.musicplayed = True
+		path = '{}/{}/{}'.format(self.library.playlistpath, music.playlists[0].name, music.localpath)
+		self.player.setFile(path)
 
 
-	def Stop(self):
-		"""Stop player
-		"""
-		self.mediaplayer.stop()
-		# self.playButton.setIcon(self.playicon)
-
-	def addMusic(self):
-		dialog = widgets.AddMusicDialog(self)
+	def addMedia(self):
+		dialog = widgets.AddMediaDialog(self)
 		ok, filename, playlistname, playlistid, index, url = dialog.get()
-		# print ("Ok :", ok)
-		# print ("filename :", filename)
-		# print ("playlistname :", playlistname)
-		# print ("playlistid :", playlistid)
-		# print ("self.playlistpath :", self.playlistpath)
 		if ok:
 			if index == 0: # From File
-				models.add_music(self.session, filename, playlistname, playlistid, self.playlistpath)
+				playlist = self.library.findById(playlistid)
+				playlist.addMedia(filename, source='File')
 				self.fillMusicTable(self.currentPlaylist)
 			elif index == 1: # From URL
-				self.downloader.download(url, playlistname, playlistid)
+				playlist = self.library.findById(playlistid)
+				self.downloader.download(url, playlist)
 
 	def addPlaylist(self):
 		dialog = widgets.AddPlaylistDialog(self)
 		ok = dialog.showDialog()
 		if ok:
 			name = dialog.getText()
-			path = self.playlistpath + '/' + name
-			newPlaylist = models.Playlist(name=name)
-			os.makedirs(self.playlistpath + '/' + name, exist_ok=True)
-			# print (newPlaylist)
-			self.session.add(newPlaylist)
-			self.session.commit()
+			playlist = self.library.addPlaylist(name)
+			self.currentPlaylist = playlist
+			self.lastplaylistadd = playlist
 			self.fillPlaylistTable()
 			self.setStatus('Playlist added')
 		else:
@@ -317,113 +234,39 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		if sys.version < '3': 
 			filename = unicode(filename)
 
-		self.setFile(filename)
-
-	def setFile(self, filename):
-		self.media = self.instance.media_new(filename)
-		self.mediaplayer.set_media(self.media)
-		self.media.parse()
-		self.setWindowTitle(self.media.get_meta(0))
-
-		if sys.platform.startswith('linux'): # for Linux using the X Server
-			self.mediaplayer.set_xwindow(self.videoframe.winId())
-		elif sys.platform == "win32": # for Windows
-			self.mediaplayer.set_hwnd(self.videoframe.winId())
-		elif sys.platform == "darwin": # for MacOS
-			self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
-
-		extention = os.path.splitext(filename)[1][1:]
-		if extention in ("mp3", "wav"):
-			self.videoframe.hide()
-			self.labelframe.show()
-			self.musicplayed = True
-			# gifpath = "{}/images/player/animation.gif".format(os.path.realpath(os.path.dirname(__file__)))
-			# self.labelframe = QLabel(self)
-			# self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-			# anim = QMovie(gifpath)
-			# self.labelframe.setMovie(anim)
-			# self.framelayout.addWidget(self.labelframe)
-			self.anim.start()
-			# print ("Animation started")
-		else:
-			self.musicplayed = False
-			self.labelframe.hide()
-			self.videoframe.show()
-
-			# self.videoframe.
-		# print (self.media.get_duration())
-		self.totalTime.setText(self.getTimeString(self.media.get_duration()))
-		self.PlayPause()
-		self.setStatus("Media added to player")
-
-	def setVolume(self, Volume):
-		"""Set the volume
-		"""
-		self.mediaplayer.audio_set_volume(Volume)
-
-	def setPosition(self, position):
-		"""Set the position
-		"""
-		# setting the position to where the slider was dragged
-		self.mediaplayer.set_position(position / 1000.0)
-
-	def getTimeString(self, time_ms):
-		ms = time_ms % 1000
-		seconds = int(time_ms / 1000) % 60
-		minutes = int(time_ms / 1000 / 60) % 60
-		hours = int(time_ms / 1000 / 60 / 60)
-
-		if seconds < 10:
-			seconds = "0" + str(seconds)
-		if minutes < 10:
-			minutes = "0" + str(minutes)
-
-		# print (minutes, seconds)
-
-		string = "{}:{}:{}".format(hours, minutes, seconds)
-
-		return string
+		self.player.setFile(filename)
 
 	def updateUI(self):
 		"""updates the user interface"""
 		# setting the slider to the desired position
-		self.positionSlider.setValue(self.mediaplayer.get_position() * 1000)
+		self.positionSlider.setValue(self.player.getPosition() * 1000)
 
 		# print ('', self.mediaplayer.get_time())
-		timeString = self.getTimeString(self.mediaplayer.get_time())
+		timeString = self.player.getTimeString(self.player.getTime())
 		self.currentTime.setText(timeString)
 
-		if not self.mediaplayer.is_playing():
+		if not self.player.mediaplayer.is_playing():
 			# no need to call this function if nothing is played
 			self.timer.stop()
-			if not self.isPaused:
-				self.Stop()
+			if not self.player.isPaused:
+				self.player.Stop()
 
 	def setStatus(self, message):
 		if message is None:
 			self.statusBar().hide()
 		else:
 			self.statusBar().showMessage(message)
+		## test
+		# self.statusBar().hide()
 
 	## Need play/pause for the Space key event
 	def keyPressEvent(self, e):
+		# self.setStatus("event : " + e.text())
+		# print (e)
 		if e.text() == ' ':
-			self.PlayPause()
+			self.player.PlayPause()
 		if e.key() == Qt.Key_Escape:
 			self.close()
-
-	def valueChanged(self, t):
-		self.positionvalue = t
-
-	def resizeEvent(self, resizeEvent):
-		self.currentwidth = resizeEvent.size().width()
-		self.currentheight = resizeEvent.size().height()
-
-		# self.playlistTable.setColumnWidth(0, self.playlistTable.geometry().width())
-		# self.musicTable.setColumnWidth(0, self.musicTable.geometry().width())
-
-		# self.playlistTable.resize(self.playlistTable.geometry().width())
-		# print ("The window has been resized - ", self.currentwidth, self.currentheight)
 
 def loadConfig():
 	config = None
@@ -435,6 +278,7 @@ def loadConfig():
 			print ("Wrong config file ./config.yml" + str(exc))
 			os._exit(1)
 	return config
+
 
 def main():
     app = QApplication(sys.argv)

@@ -27,7 +27,7 @@ class Ui_Downloader(object):
         self.verticalLayout.addWidget(self.pbar)
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(4)
+        self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(1)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setVerticalHeaderItem(0, item)
@@ -39,6 +39,8 @@ class Ui_Downloader(object):
         self.tableWidget.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
         self.verticalLayout.addWidget(self.tableWidget)
         self.gridLayout_2.addLayout(self.verticalLayout, 0, 0, 1, 1)
         Downloader.setCentralWidget(self.centralwidget)
@@ -66,6 +68,8 @@ class Ui_Downloader(object):
         item.setText(_translate("Downloader", "Progress"))
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("Downloader", "Time"))
+        item = self.tableWidget.horizontalHeaderItem(4)
+        item.setText(_translate("Downloader", "url"))
 
 
 if __name__ == "__main__":
