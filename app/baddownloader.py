@@ -166,30 +166,15 @@ class sigHandling(QObject):
 			'progress_hooks': [my_hook],
 		}
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-			# finish = False
 			try:
 				self.info = ydl.extract_info(url, download=False)
+				hWindow.initDL(self.info)
+				ydl.download([url])
+
 			except Exception as e:
 				print (e)
-
-			# print (self.info)
-			hWindow.initDL(self.info)
-
-			#### AJOUTER UN TRY EXCEPT RAISE
-			# def tryit():
-			# 	try:
-			# 		print ("TRYING TO DOWNLOAT THAT SHIT !")
-			# 		ydl.download([url])
-			# 	except Exception as e:
-			# 		print ('##########')
-			# 		print (e)
-			# 		print ('##########')
-			# 		tryit()
-
-			# tryit()
-			ydl.download([url])
-
 		return
+
 
 class MyLogger(object):
 	def __init__(self, id):
