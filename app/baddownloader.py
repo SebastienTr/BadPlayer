@@ -15,6 +15,8 @@ import app.badmodels as models
 
 import time
 
+import app.badparsers as parsers
+
 dlThread = dict()
 hWindow = 0
 fProgressCounter = 0.0
@@ -27,6 +29,7 @@ class DLItem(QObject):
 		self.url = url
 		self.parent = parent
 		self.id = id
+		self.format = 'audio' # 'video' 'audio'
 
 		self.hSignals = sigHandling(self.id)
 		self.hSignals.dlProgress_update.connect(self.hSignals.pbar_incrementer)
@@ -51,9 +54,34 @@ class DLItem(QObject):
 
 		global dlThread
 
-		dlThread[self.id] = threading.Thread(target=self.hSignals.runDL,args=(self.url,self.parent.parent.library.playlistpath))
-		dlThread[self.id].start()
+		ydl_opts = {
+			'outtmpl': self.parent.parent.library.playlistpath + '/%(title)s-%(id)s.%(ext)s',  # name the file the ID of the video
+			'logger': MyLogger(self.id),
+			# 'progress_hooks': [my_hook],
+			'addmetadata': True,
+			'verbose': True
+		}
+		if self.format == 'audio':
+			ydl_opts.update({
+			'format': 'bestaudio/best',
+			'postprocessors': [{
+				'key': 'FFmpegExtractAudio',
+				'preferredcodec': 'mp3',
+				'preferredquality': '192',
+			}],
+			'audioformat': "mp3",      # convert to mp3 
+			})
+		elif self.format == 'video':
+			ydl_opts.update({
+				'format': '22/best'
+			})
+			ydl_opts = {
+				'outtmpl': self.parent.parent.library.playlistpath + '/%(title)s-%(id)s.%(ext)s',  # name the file the ID of the video
+			}
 
+
+		dlThread[self.id] = threading.Thread(target=self.hSignals.runDL,args=(self.url,ydl_opts))
+		dlThread[self.id].start()
 
 class Downloader(QMainWindow, Ui_Downloader):
 	"""docstring for Downloader"""
@@ -65,7 +93,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 		hWindow = self
 
 		self.setupUi(self)
-		# self.tableWidget.horizontalHeader().setStretchLastSection(True)
+		self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
 		self.items = list()
 		self.lastId = 0
@@ -89,6 +117,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 		global fProgressCounter, info
 		item = self.getById(id)
 
+		print (info)
 		if item is not None:
 			item.progressitem.setText(info['_percent_str'])
 			item.sizeitem.setText(info['_total_bytes_str'] if info['_total_bytes_str'] is not None else info['_total_bytes_estimate_str'])
@@ -118,17 +147,47 @@ class Downloader(QMainWindow, Ui_Downloader):
 		path = path.replace('/', '_')
 		return path
 
-	def done(self, info):
-		webmFile = '{}/{}-{}.{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'webm')
-		m4aFile = '{}/{}-{}.{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'm4a')
-		while os.path.exists(webmFile) is True or os.path.exists(m4aFile) is True:
-			time.sleep(1)
-		print ("ok it's really done now !!!")
+	def done(self, info, id):
+		print ('Done method')
+		filepath = info['filename']
+
+		dlitem = self.getById(id)
+
+		format = '.mp3' if dlitem.format == 'audio' else '.mkv'
+
+		tmpfilename = info['tmpfilename']
+		otherfilename = info['filename']
+		finalfilename = info['filename'].replace('.webm', '').replace('.mp4', '')
+		if dlitem.format == 'video':
+			finalfilename = finalfilename[:-5]
+		webmfilename = finalfilename + ".webm"
+		finalfilename = finalfilename + format
+		name = os.path.splitext(os.path.basename(finalfilename))[0]
+
+		while os.path.exists(tmpfilename) or os.path.exists(otherfilename) or os.path.exists(webmfilename):
+			time.sleep(0.5)
 		playlist = self.playlist
-		filename = '{}/{}-{}.{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
-		playlist.addMedia(filename, source='Youtube')
+
+		print (tmpfilename)
+		print (otherfilename)
+		print (finalfilename)
+		print (webmfilename)
+		print (name[:-11])
+		artist_name, song_name = self.getTitleAuthor(name[:-11])
+		print ('title', song_name)
+		print ('artist', artist_name)
+		# https://www.youtube.com/watch?v=TKHz-_MmH68
+		# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
+		print ("Add to DB")
+		playlist.addMedia(name=name, filename=finalfilename, source='Youtube', sourceurl=dlitem.url)
+		print ("ok it's really done now !!!")
+		os.remove(finalfilename)
 		# models.add_music(self.parent.session, filename, self.playlistname, self.playlistid, self.parent.playlistpath, source="Youtube")
 		self.parent.fillMusicTable(self.parent.currentPlaylist)
+
+	def getTitleAuthor(self, name):
+		parser = parsers.YoutubeTitleParser(name)
+		return parser.artist_name.replace('-', ''), parser.song_name.replace('-', '')
 
 class sigHandling(QObject):
 	dlProgress_update = pyqtSignal(float)
@@ -145,12 +204,12 @@ class sigHandling(QObject):
 
 	@pyqtSlot()
 	def dlDone(self):
+		print ('Done signal recieve in handler')
 		hWindow.pbar.setValue(100)
-		hWindow.done(self.info)
+		hWindow.done(info, self.id)
 
-	def runDL(self, url, playlistpath):
+	def runDL(self, url, ydl_opts):
 		global dlThread, hWindow, info
-		self.playlistpath = playlistpath
 
 		def my_hook(d):
 			if d['status'] == 'downloading':
@@ -163,26 +222,18 @@ class sigHandling(QObject):
 				print('Done downloading, now converting ...')
 				self.dlProgress_done.emit()
 
-
-		ydl_opts = {
-			'format': 'bestaudio/best',
-			'postprocessors': [{
-				'key': 'FFmpegExtractAudio',
-				'preferredcodec': 'mp3',
-				'preferredquality': '192',
-			}],
-			'audioformat': "mp3",      # convert to mp3 
-			'outtmpl': playlistpath + '/%(title)s-%(id)s.%(ext)s',  # name the file the ID of the video
-			'logger': MyLogger(self.id),
-			'progress_hooks': [my_hook],
-		}
+		ydl_opts['progress_hooks'] = [my_hook]
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
 			def tryit():
 				try:
-					self.info = ydl.extract_info(url, download=False)
+					# self.info = ydl.extract_info(url, download=False)
 					# hWindow.initDL(self.info)
+					# print ('--------------------------------------')
+					# print (ydl.)
+					# print ('--------------------------------------')
+
 					try:
-						ydl.download([url])
+						print (ydl.download([url]))
 					except Exception as edl:
 						print ("-- EXCEPTON EXCEPTON EXCEPTON EXCEPTON EXCEPTON ")
 						print (edl)
@@ -192,7 +243,69 @@ class sigHandling(QObject):
 					print (einfo)
 					print ("--------------")
 					tryit()
-			tryit()
+			print (ydl.download([url]))
+			print ('--------------------------------------------------------')
+			# tryit()
+		################################################################
+		# ydl_opts = {
+		#     'usenetrc': opts.usenetrc,
+		#     'username': opts.username,
+		#     'password': opts.password,
+		#     # ... all options list available in sources
+		#     'exec_cmd': opts.exec_cmd,
+		# }
+		# with YoutubeDL(ydl_opts) as ydl:
+		# 	ydl.print_debug_header()
+		# 	ydl.add_default_info_extractors()
+
+		# 	# PostProcessors
+		# 	# Add the metadata pp first, the other pps will copy it
+		# 	if opts.addmetadata:
+		# 		ydl.add_post_processor(FFmpegMetadataPP())
+		# 	if opts.extractaudio:
+		# 		ydl.add_post_processor(FFmpegExtractAudioPP(preferredcodec=opts.audioformat, preferredquality=opts.audioquality, nopostoverwrites=opts.nopostoverwrites))
+		# 	if opts.recodevideo:
+		# 		ydl.add_post_processor(FFmpegVideoConvertor(preferedformat=opts.recodevideo))
+		# 	if opts.embedsubtitles:
+		# 		ydl.add_post_processor(FFmpegEmbedSubtitlePP(subtitlesformat=opts.subtitlesformat))
+		# 	if opts.xattrs:
+		# 		ydl.add_post_processor(XAttrMetadataPP())
+		# 	if opts.embedthumbnail:
+		# 		if not opts.addmetadata:
+		# 			ydl.add_post_processor(FFmpegAudioFixPP())
+		# 		ydl.add_post_processor(AtomicParsleyPP())
+
+
+		# 	# Please keep ExecAfterDownload towards the bottom as it allows the user to modify the final file in any way.
+		# 	# So if the user is able to remove the file before your postprocessor runs it might cause a few problems.
+		# 	if opts.exec_cmd:
+		# 		ydl.add_post_processor(ExecAfterDownloadPP(
+		# 			verboseOutput=opts.verbose, exec_cmd=opts.exec_cmd))
+
+		# 	# Update version
+		# 	if opts.update_self:
+		# 		update_self(ydl.to_screen, opts.verbose)
+
+		# 	# Remove cache dir
+		# 	if opts.rm_cachedir:
+		# 		ydl.cache.remove()
+
+		# 	# Maybe do nothing
+		# 	if (len(all_urls) < 1) and (opts.load_info_filename is None):
+		# 		if not (opts.update_self or opts.rm_cachedir):
+		# 			parser.error(u'you must provide at least one URL')
+		# 		else:
+		# 			sys.exit()
+
+		# 	try:
+		# 		if opts.load_info_filename is not None:
+		# 			retcode = ydl.download_with_info_file(opts.load_info_filename)
+		# 		else:
+		# 			retcode = ydl.download(all_urls)
+		# 	except MaxDownloadsReached:
+		# 		ydl.to_screen(u'--max-download limit reached, aborting.')
+		# 		retcode = 101
+		# ################################################################
 		return
 
 class MyLogger(QObject):

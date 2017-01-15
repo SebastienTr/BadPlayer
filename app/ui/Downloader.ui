@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>981</width>
+    <width>829</width>
     <height>480</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
         <item>
          <widget class="QTableWidget" name="tableWidget">
           <property name="styleSheet">
-           <string notr="true">background-color:#481616; color:white</string>
+           <string notr="true">background-color:#481616; color:grey</string>
           </property>
           <column>
            <property name="text">
@@ -77,7 +77,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>981</width>
+     <width>829</width>
      <height>22</height>
     </rect>
    </property>

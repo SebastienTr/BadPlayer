@@ -22,7 +22,7 @@ class Ui_Downloader(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setStyleSheet("background-color:#481616; color:white")
+        self.tableWidget.setStyleSheet("background-color:#481616; color:grey")
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(6)
         self.tableWidget.setRowCount(0)

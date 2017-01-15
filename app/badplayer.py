@@ -202,7 +202,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		if ok:
 			if index == 0: # From File
 				playlist = self.library.findById(playlistid)
-				playlist.addMedia(filename, source='File')
+				playlist.addMedia(name=filename, filename=filename, source='File')
 				self.fillMusicTable(self.currentPlaylist)
 			elif index == 1: # From URL
 				playlist = self.library.findById(playlistid)

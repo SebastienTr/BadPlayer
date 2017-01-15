@@ -49,7 +49,7 @@ class Song(Base):
 	name = Column(String(50))
 	source = Column(String(255))
 	sourceurl = Column(String(1024), nullable=True)
-	localpath = Column(String(1024), unique=True)
+	localpath = Column(String(1024), unique=True, nullable=False)
 	playlists = relationship('Playlist', secondary=songsinplaylist, back_populates='songs')
 
 	def __str__(self):
