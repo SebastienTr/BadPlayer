@@ -43,7 +43,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.homepath = os.path.expanduser("~")
 		self.librarypath = os.path.join(self.homepath, "Music/BadPlayer")
 		self.library =  BadLibrary(self.librarypath, self)
-		os.makedirs(self.library.playlistpath, exist_ok=True)
+		# os.makedirs(self.library.playlistpath, exist_ok=True)
 
 		# self.initVLC(self.config['player'])
 		self.player = PlayerInterface(self.config['player'], self)
@@ -256,8 +256,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 			self.statusBar().hide()
 		else:
 			self.statusBar().showMessage(message)
-		## test
-		# self.statusBar().hide()
 
 	## Need play/pause for the Space key event
 	def keyPressEvent(self, e):
@@ -284,5 +282,4 @@ def main():
     app = QApplication(sys.argv)
     config = loadConfig()
     window = BadPlayer(config)
-    # window.show()
     sys.exit(app.exec_())

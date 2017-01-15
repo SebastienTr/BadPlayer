@@ -18,15 +18,15 @@ import time
 dlThread = 0
 hWindow = 0
 fProgressCounter = 0.0
+info = None
 
-# finish = False
-
-# class TableWidgetItem(QTableWidgetItem):
-# 	def __init__(self, item, id=0, dbitem=None):
-# 		super().__init__(item)
-# 		self.id = id
-# 		self.item = item
-# 		self.dbitem = dbitem
+class DLItem(QObject):
+	"""This class is a representation of a downloading element"""
+	def __init__(self, parent, url=None):
+		super(DLItem, self).__init__()
+		self.url = url
+		self.parent = parent
+		
 
 class Downloader(QMainWindow, Ui_Downloader):
 	"""docstring for Downloader"""
@@ -38,11 +38,16 @@ class Downloader(QMainWindow, Ui_Downloader):
 		hWindow = self
 
 		self.setupUi(self)
+		self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
 	def download(self, url, playlist):
 		self.playlist = playlist
 		self.show()
-		self.tableWidget.setItem(0, 4, QTableWidgetItem(url))
+
+		if url == "":
+			QMessageBox.information(self, "Empty URL",
+					"Please enter the URL of the file you want to download.")
+			return
 
 		global dlThread
 
@@ -50,14 +55,22 @@ class Downloader(QMainWindow, Ui_Downloader):
 		hSignals.dlProgress_update.connect(hSignals.pbar_incrementer)
 		hSignals.dlProgress_done.connect(hSignals.dlDone)
 
-		if url == "":
-			QMessageBox.information(self, "Empty URL",
-					"Please enter the URL of the file you want to download.")
-			return
-		# else:
-		# 	filename = str(QFileDialog.getSaveFileName(self, 'Choose the download location and file name', '.')) ## DETECT A CANCEL
-		# 	filename = filename[:-6]
-		# 	filename = filename.split("('",maxsplit=1)[1]
+		rowPosition = self.tableWidget.rowCount()
+		self.tableWidget.insertRow(rowPosition)
+
+		self.sizeitem = QTableWidgetItem('')
+		self.progressitem = QTableWidgetItem('')
+		self.timeitem = QTableWidgetItem('')
+		self.titleitem = QTableWidgetItem('')
+		self.speeditem = QTableWidgetItem('')
+
+		self.tableWidget.setItem(rowPosition, 0, self.titleitem)
+		self.tableWidget.setItem(rowPosition, 1, self.sizeitem)
+		self.tableWidget.setItem(rowPosition, 2, self.progressitem)
+		self.tableWidget.setItem(rowPosition, 3, self.speeditem)
+		self.tableWidget.setItem(rowPosition, 4, self.timeitem)
+
+		self.tableWidget.setItem(0, 5, QTableWidgetItem(url))
 
 		# self.bttDL.setEnabled(False)
 		dlThread = threading.Thread(target=hSignals.runDL,args=(url,self.parent.library.playlistpath))
@@ -65,19 +78,18 @@ class Downloader(QMainWindow, Ui_Downloader):
 		return
 
 	def initDL(self, info):
-		# pass
-		# self.pbartest = QProgressBar()
-		self.sizeitem = QTableWidgetItem('')
-		self.progressitem = QTableWidgetItem('')
-		self.tableWidget.setItem(0, 0, QTableWidgetItem(info['title']))
-		self.tableWidget.setItem(0, 1, self.sizeitem)
-		self.tableWidget.setItem(0, 2, self.progressitem)
-		self.tableWidget.setItem(0, 3, QTableWidgetItem(''))
-		# self.tableWidget.setCellWidget(0, 2, self.pbartest)
+		pass
+		# self.sizeitem.setText("42")
+		# self.titleitem.setText(info['title'])
+		# self.progressitem.setText("0%")
 
 	def pbarIncValue(self, val):
-		global fProgressCounter
-		#print("pbarIncValue({0})\nfProgressCounter={1}".format(val,fProgressCounter))
+		global fProgressCounter, info
+		self.progressitem.setText(info['_percent_str'])
+		self.sizeitem.setText(info['_total_bytes_str'] if info['_total_bytes_str'] is not None else info['_total_bytes_estimate_str'])
+		self.speeditem.setText(info['_speed_str'])
+		self.timeitem.setText(info['_eta_str'])
+		self.titleitem.setText(os.path.basename(info['filename']))
 
 		if self.pbar.value() >= 100:
 			# self.dlProgress_done.emit()
@@ -119,48 +131,25 @@ class sigHandling(QObject):
 	@pyqtSlot(float)
 	def pbar_incrementer(self, val):
 		hWindow.pbarIncValue(val)
-		# hWindow.sizeitem.setText(d['d']['_total_bytes_str'])
-		# hWindow.progressitem.setText(d['d']['_percent_str'])
 
 	@pyqtSlot()
 	def dlDone(self):
-		# webmFile = '{}/{}-{}.{}'.format(self.parent.playlistpath, self.formatPath(info['title']), self.info['id'], 'webm')
-		# while os.path.exists(webmFile) is True:
-		# 	time.sleep(1)
 		hWindow.pbar.setValue(100)
 		hWindow.done(self.info)
 
 	def runDL(self, url, playlistpath):
-		#print("in run")
-		global dlThread, hWindow
+		global dlThread, hWindow, info
 		self.playlistpath = playlistpath
-		# def report(block_count, block_size, total_size):
-		# 	if block_count == 0:
-		# 		#print("block_count == 0")
-		# 		self.dlProgress_update.emit(0)
-		# 	if (block_count * block_size) == total_size:
-		# 		self.dlProgress_done.emit()
-		# 	incAmount = float((100*block_size) / total_size)
-		# 	#print("BS={0} TS={1} incAmount={2}".format(block_size,total_size,incAmount))
-		# 	self.dlProgress_update.emit(incAmount)
 
 		def my_hook(d):
-			print ('#################')
-			print (d)
-			print ('#################')
 			if d['status'] == 'downloading':
-				print(d['filename'], d['_percent_str'], d['_eta_str'])
-			# print ("HOOOK : ", d)
 				bytes = d['total_bytes'] if 'total_bytes' in d else d['total_bytes_estimate']
-				incAmount = float((100*d['downloaded_bytes']) / d['total_bytes'])
-			# #print("BS={0} TS={1} incAmount={2}".format(block_size,total_size,incAmount))
-			# print ("#######################", incAmount)
+				incAmount = float((100*d['downloaded_bytes']) / bytes)
+				global info
+				info = d
 				self.dlProgress_update.emit(incAmount)
 			if d['status'] == 'finished':
 				print('Done downloading, now converting ...')
-				print (d)
-				print('\n\n')
-				print (self.info)
 				self.dlProgress_done.emit()
 
 
@@ -173,7 +162,7 @@ class sigHandling(QObject):
 			}],
 			'audioformat': "mp3",      # convert to mp3 
 			'outtmpl': playlistpath + '/%(title)s-%(id)s.%(ext)s',  # name the file the ID of the video
-			'logger': MyLogger(),
+			'logger': MyLogger(0),
 			'progress_hooks': [my_hook],
 		}
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -183,42 +172,37 @@ class sigHandling(QObject):
 			except Exception as e:
 				print (e)
 
+			# print (self.info)
 			hWindow.initDL(self.info)
-			#### AJOUTER UN TRY CATCH RAISE
-			def tryit():
-				try:
-					print ("TRYING TO DOWNLOAT THAT SHIT !")
-					ydl.download([url])
-				except Exception as e:
-					print ('##########')
-					print (e)
-					print ('##########')
-					tryit()
 
-			tryit()
-			print (self.info)
+			#### AJOUTER UN TRY EXCEPT RAISE
+			# def tryit():
+			# 	try:
+			# 		print ("TRYING TO DOWNLOAT THAT SHIT !")
+			# 		ydl.download([url])
+			# 	except Exception as e:
+			# 		print ('##########')
+			# 		print (e)
+			# 		print ('##########')
+			# 		tryit()
 
-
+			# tryit()
+			ydl.download([url])
 
 		return
-		# urllib.request.urlretrieve(dlLink, filename, reporthook=report)
-		# #print("emit dlProgress_done")
-		# self.dlProgress_done.emit()
-		# #print("about to leave dlThread")
-		# pass
 
 class MyLogger(object):
+	def __init__(self, id):
+		self.id = id
+
 	def debug(self, msg):
-		print ("DEBUG", msg)
-		# if str(msg).find("Deleting original file"):
-			# print ('DELETED MOTHER FUCKER ', finish)
-			# finish = True
+		print ("DEBUG", self.id, '\n', msg)
 		pass
 
 	def warning(self, msg):
-		print ("WARNING", msg)
+		print ("WARNING", self.id, '\n', msg)
 		pass
 
 	def error(self, msg):
-		print ("ERROR", msg)
+		print ("ERROR", self.id, '\n', msg)
 		pass

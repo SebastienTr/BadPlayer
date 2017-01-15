@@ -40,14 +40,12 @@ c2ViYXN0aWVudHJlaWxsZUBnbWFpbC5jb20=
 ---------------------
 ---------------------
 ###Improves
-######Architecture 
-Il faudrait gerer les playlist comme un object Library, donc importer une playlist qui correspond à un path vers un dosier /libraryName, avec dedans :
-	- /libraryName/db.sqlite3
-	- /libraryName/playlists/
-Ça permetrais de reconsidérer la manipulation des musiques en bases et sur le disque.
-
 
 ######UI/UX
 `https://dribbble.com/search?q=media+player`
 
 Pour l'instant c'est vraiment moche et pas pratique, sur ce lien il y a pas mal d'exemple à prendre en compte
+
+######Downloader
+- Multidownload multithread
+- UI improve, one row per download

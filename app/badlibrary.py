@@ -14,6 +14,10 @@ class BadLibrary(object):
 		self.dbpath = os.path.join(self.path, "db.sqlite3")
 		self.session = models.createSession(self.dbpath)
 
+		os.makedirs(self.playlistpath, exist_ok=True)
+		self.downloadpath = os.path.join(self.path, 'downloads')
+		os.makedirs(self.downloadpath, exist_ok=True)
+
 		self.refresh()
 
 	def refresh(self):

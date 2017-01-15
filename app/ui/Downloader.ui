@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>825</width>
     <height>480</height>
    </rect>
   </property>
@@ -18,72 +18,48 @@
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout"/>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QTableWidget" name="tableWidget">
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Progress</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Speed</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Time</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>url</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QProgressBar" name="pbar">
         <property name="value">
          <number>0</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="tableWidget">
-        <row>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </row>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Size</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Progress</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Time</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>url</string>
-         </property>
-        </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>Titi</string>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string>42MiB</string>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string>78.3%</string>
-         </property>
-        </item>
-        <item row="0" column="3">
-         <property name="text">
-          <string>00:22 </string>
-         </property>
-        </item>
-        <item row="0" column="4">
-         <property name="text">
-          <string>https://www.youtube.com/watch?v=gA_wQ5JL9lg</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
@@ -95,7 +71,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>640</width>
+     <width>825</width>
      <height>22</height>
     </rect>
    </property>
