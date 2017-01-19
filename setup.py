@@ -13,6 +13,7 @@ def read(fname):
 
 APP = ['main.py']
 APP_NAME = "Bad Player"
+APP_VERSION = "0.0.2"
 DATA_FILES = [
     ('', ['config.yml',]),
     ('app/images/player/', ['app/images/player/animation.gif'])
@@ -26,6 +27,7 @@ OPTIONS = {
 setup(
 	name=APP_NAME,
     app=APP,
+    version=APP_VERSION,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     setup_requires=['py2app', 'PyQt5', 'sqlalchemy', 'pyyaml', 'eyed3', 'youtube_dl'],

@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Downloader(object):
     def setupUi(self, Downloader):
         Downloader.setObjectName("Downloader")
-        Downloader.resize(981, 480)
+        Downloader.resize(829, 480)
         Downloader.setStyleSheet("background-color:#301010;")
         self.centralwidget = QtWidgets.QWidget(Downloader)
         self.centralwidget.setObjectName("centralwidget")
@@ -47,7 +47,7 @@ class Ui_Downloader(object):
         self.gridLayout_2.addLayout(self.verticalLayout, 0, 0, 1, 1)
         Downloader.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(Downloader)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 981, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 829, 22))
         self.menubar.setObjectName("menubar")
         Downloader.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(Downloader)

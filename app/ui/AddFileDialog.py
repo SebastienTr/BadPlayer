@@ -41,6 +41,13 @@ class Ui_AddFileDialog(object):
         self.label.setMaximumSize(QtCore.QSize(16777215, 20))
         self.label.setObjectName("label")
         self.verticalLayout_3.addWidget(self.label)
+        self.checkBox = QtWidgets.QCheckBox(self.tab_2)
+        self.checkBox.setEnabled(True)
+        self.checkBox.setAcceptDrops(False)
+        self.checkBox.setCheckable(True)
+        self.checkBox.setChecked(False)
+        self.checkBox.setObjectName("checkBox")
+        self.verticalLayout_3.addWidget(self.checkBox)
         self.url = QtWidgets.QLineEdit(self.tab_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -59,7 +66,7 @@ class Ui_AddFileDialog(object):
         self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(AddFileDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         self.buttonBox.accepted.connect(AddFileDialog.accept)
         self.buttonBox.rejected.connect(AddFileDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(AddFileDialog)
@@ -71,6 +78,7 @@ class Ui_AddFileDialog(object):
         self.openfilebutton.setText(_translate("AddFileDialog", "Open"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.fromFile), _translate("AddFileDialog", "File"))
         self.label.setText(_translate("AddFileDialog", "Enter a youtube url"))
+        self.checkBox.setText(_translate("AddFileDialog", "Download video"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("AddFileDialog", "URL"))
 
 
