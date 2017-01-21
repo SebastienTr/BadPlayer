@@ -125,8 +125,12 @@ class BadPlaylist(BadItem):
 		# namewithoutext = os.path.splitext(name)[0]
 		path = os.path.join(self.parent.playlistpath, self.name)
 		path = os.path.join(path, os.path.basename(name))
+		print ("- Copy", filename, 'to', path)
 		if os.path.exists(path) is not True:
-			shutil.copy(filename, path)
+			try:
+				shutil.copy(filename, path)
+			except Exception as e:
+				pass
 		newmedia = models.Song(name=name, source=source, localpath=name, sourceurl=sourceurl)
 		newmedia.playlists.append(self.dbitem)
 		self.session.add(newmedia)

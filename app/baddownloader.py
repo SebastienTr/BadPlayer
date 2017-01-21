@@ -153,7 +153,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 
 		dlitem = self.getById(id)
 
-		format = '.mp3' if dlitem.format == 'audio' else '.mkv'
+		format = '.mp3' if dlitem.format == 'audio' else '.mp4'
 
 		tmpfilename = info['tmpfilename']
 		otherfilename = info['filename']
@@ -181,7 +181,8 @@ class Downloader(QMainWindow, Ui_Downloader):
 		print ("Add to DB")
 		playlist.addMedia(name=name, filename=finalfilename, source='Youtube', sourceurl=dlitem.url)
 		print ("ok it's really done now !!!")
-		os.remove(finalfilename)
+		if os.path.exists(finalfilename) is True:
+			os.remove(finalfilename)
 		# models.add_music(self.parent.session, filename, self.playlistname, self.playlistid, self.parent.playlistpath, source="Youtube")
 		self.parent.fillMusicTable(self.parent.currentPlaylist)
 
