@@ -20,7 +20,7 @@ DATA_FILES = [
 ]
 OPTIONS = {
             'argv_emulation': True,
-            'iconfile': 'app/images/icon.icns',
+            'iconfile': 'app/images/badicon.icns',
             'includes': ['sip','PyQt5']
             }
 
