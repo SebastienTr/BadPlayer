@@ -168,7 +168,10 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 			button.setStyleSheet("color: white; background-color: black")
 
 	def getImage(self, folder, filename):
-		icon = QIcon(QPixmap(os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename)))
+		bpath = os.path.dirname(os.path.realpath(__file__))
+		icon = QIcon(QPixmap(os.path.join('app', 'images', folder, filename)))
+		# icon = QIcon(QPixmap(os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename)))
+		# print (os.path.dirname(os.path.realpath(__file__)) + '/images/{}/{}'.format(folder,filename))
 		return icon
 
 	def openDownloader(self):
@@ -191,7 +194,8 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	def musicDoubleClicked(self, item):
 		self.currentMusic = item
 		music = item.dbitem
-		path = '{}/{}/{}'.format(self.library.playlistpath, music.playlists[0].name, music.localpath)
+		path = os.path.join(self.library.playlistpath, music.playlists[0].name, music.localpath)
+		# path = '{}/{}/{}'.format(self.library.playlistpath, music.playlists[0].name, music.localpath)
 		self.player.setFile(path)
 
 
@@ -267,15 +271,14 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 def loadConfig():
 	config = None
-	configpath = "./config.yml"
+	configpath = "config.yml"
 	with open(configpath, 'r') as stream:
 		try:
 			config = yaml.load(stream)
 		except yaml.YAMLError as exc:
-			print ("Wrong config file ./config.yml" + str(exc))
+			print ("Wrong config file '{}'".format(configpath) + str(exc))
 			os._exit(1)
 	return config
-
 
 def main():
     app = QApplication(sys.argv)

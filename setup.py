@@ -16,7 +16,10 @@ APP_NAME = "Bad Player"
 APP_VERSION = "0.0.2"
 DATA_FILES = [
     ('', ['config.yml',]),
-    ('app/images/player/', ['app/images/player/animation.gif'])
+    ('app/images/player/', ['app/images/player/animation.gif',
+                            'app/images/player/play.png',
+                            'app/images/player/pause.png',
+                            'app/images/player/stop.png']),
 ]
 OPTIONS = {
             'argv_emulation': True,
