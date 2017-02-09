@@ -36,9 +36,9 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.clickedMusic = None
 		self.firstFillPL = True
 		self.firstFillSG = True
-		self.downloader = Downloader(self)
 
 		self.setupUi(self)
+		self.downloader = Downloader(self)
 
 		self.homepath = os.path.expanduser("~")
 		self.librarypath = os.path.join(self.homepath, "Music/BadPlayer")
@@ -50,6 +50,8 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 
 		self.initUI()
 		self.initMenu()
+		## Flat design
+		# self.setWindowFlags(Qt.FramelessWindowHint)
 
 		self.show()
 
@@ -147,16 +149,13 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	def setPosition(self, position):
 		"""Set the position
 		"""
-		# setting the position to where the slider was dragged
-		self.player.setPosition(position / 1000.0)
+		self.player.setPosition(position)
 
 	def sliderPressed(self, t=-1):
-		self.player.sliderPressed(self.player.positionvalue / 1000.0)
+		self.player.sliderPressed(self.player.positionvalue)
 
 	def valueChanged(self, t):
 		self.player.positionvalue = t
-
-
 
 	def setupButton(self, button, funct=None, icon=None, text=None, style=True):
 		if funct is not None:

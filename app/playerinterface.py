@@ -121,8 +121,13 @@ class PlayerInterface(QObject):
 	def sliderPressed(self, t=-1):
 		self.mediaplayer.set_position(self.positionvalue / 1000.0)
 
-	def valueChanged(self, t):
-		self.positionvalue = t
+	# def valueChanged(self, t):
+	# 	print ('Value changed, new value : ', t)
+	# 	if t != 0:
+	# 		self.player.positionvalue = t
+	# 		print ('- value changed')
+	# 	else:
+	# 		print ('- value not changed')
 
 
 	def getAudioVolume(self):

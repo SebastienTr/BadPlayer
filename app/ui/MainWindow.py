@@ -11,9 +11,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
+        MainWindow.setEnabled(True)
         MainWindow.resize(974, 502)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("background-color:#301010;")
+        MainWindow.setDocumentMode(False)
+        MainWindow.setUnifiedTitleAndToolBarOnMac(True)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -130,6 +133,9 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
+        self.menuBad_Player = QtWidgets.QMenu(self.menubar)
+        self.menuBad_Player.setAutoFillBackground(False)
+        self.menuBad_Player.setObjectName("menuBad_Player")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -148,6 +154,11 @@ class Ui_MainWindow(object):
         self.actionExit.setObjectName("actionExit")
         self.actionOpenDownloader = QtWidgets.QAction(MainWindow)
         self.actionOpenDownloader.setObjectName("actionOpenDownloader")
+        self.actionParameters = QtWidgets.QAction(MainWindow)
+        self.actionParameters.setCheckable(False)
+        self.actionParameters.setObjectName("actionParameters")
+        self.actionAbout = QtWidgets.QAction(MainWindow)
+        self.actionAbout.setObjectName("actionAbout")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionAddPlaylist)
@@ -157,6 +168,9 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpenDownloader)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
+        self.menuBad_Player.addAction(self.actionParameters)
+        self.menuBad_Player.addAction(self.actionAbout)
+        self.menubar.addAction(self.menuBad_Player.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -173,6 +187,7 @@ class Ui_MainWindow(object):
         self.playButton.setText(_translate("MainWindow", "Play"))
         self.stopButton.setText(_translate("MainWindow", "Stop"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.menuBad_Player.setTitle(_translate("MainWindow", "Bad Player"))
         self.actionOpen.setText(_translate("MainWindow", "Open"))
         self.actionAddPlaylist.setText(_translate("MainWindow", "Add playlist"))
         self.actionAddMedia.setText(_translate("MainWindow", "Add music from file or url"))
@@ -180,6 +195,8 @@ class Ui_MainWindow(object):
         self.actionAddMusicFromSoundcloud.setText(_translate("MainWindow", "Add music from Soundcloud"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionOpenDownloader.setText(_translate("MainWindow", "Open downloader"))
+        self.actionParameters.setText(_translate("MainWindow", "Parameters"))
+        self.actionAbout.setText(_translate("MainWindow", "About"))
 
 
 if __name__ == "__main__":

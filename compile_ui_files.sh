@@ -7,3 +7,4 @@ function compile {
 compile MainWindow
 compile Downloader
 compile AddFileDialog
+compile SettingsDialog

@@ -44,8 +44,18 @@ c2ViYXN0aWVudHJlaWxsZUBnbWFpbC5jb20=
 ######UI/UX
 `https://dribbble.com/search?q=media+player`
 
-Pour l'instant c'est vraiment moche et pas pratique, sur ce lien il y a pas mal d'exemple à prendre en compte
+Pour l'instant c'est vraiment moche et pas pratique, sur ce lien il y a pas mal d'exemple à prendre en compte.
+Now it's quite ugly and really not convenient to use, on this link there is some interesting example.
 
 ######Downloader
 - Multidownload multithread
 - UI improve, one row per download
+
+######Multi play
+Now we just can play one song, it's not that convenient
+
+######Windows
+Change path
+
+######Pytube or not pytube
+https://github.com/nficano/pytube

@@ -93,6 +93,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 		hWindow = self
 
 		self.setupUi(self)
+		self.menubar = self.parent.menubar;
 		self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
 		self.items = list()
