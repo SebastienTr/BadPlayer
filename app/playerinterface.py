@@ -71,6 +71,7 @@ class PlayerInterface(QObject):
 		# self.playButton.setIcon(self.playicon)
 
 	def setFile(self, filename):
+		print ("SET -> ", filename)
 		self.media = self.instance.media_new(filename)
 		self.mediaplayer.set_media(self.media)
 		self.media.parse()
