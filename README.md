@@ -48,17 +48,24 @@ Pour l'instant c'est vraiment moche et pas pratique, sur ce lien il y a pas mal 
 Now it's quite ugly and really not convenient to use, on this link there is some interesting example.
 
 ######Downloader
-- Multidownload multithread
-- UI improve, one row per download
+- Clean network
+- Error handling
+- Threading improve
+- UI
 
 ######Multi play
 Now we just can play one song, it's not that convenient
 
 ######Windows
-Change path
+Change path (pictures done)
 
-######Pytube or not pytube
+######Pytube or not pytube ?
 https://github.com/nficano/pytube
 
 ######Unit tests
 Hmm ... a lot of work there !
+
+* Network test :
+  * One music download
+  * One video download
+  * One parallel music + video download
