@@ -28,8 +28,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	def __init__(self, config):
 		super(BadPlayer, self).__init__()
 		self.title = 'Bad Player'
-		# QEvent.accept()
-		# self.parent = parent
 
 		self.config = config
 		self.clickedPL = None
@@ -41,7 +39,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.downloader = Downloader(self)
 
 		self.homepath = os.path.expanduser("~")
-		self.librarypath = os.path.join(self.homepath, "Music/BadPlayer")
+		self.librarypath = os.path.join(self.homepath, "Music", "BadPlayer")
 		self.library =  BadLibrary(self.librarypath, self)
 		# os.makedirs(self.library.playlistpath, exist_ok=True)
 
@@ -192,11 +190,17 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.fillMusicTable(self.currentPlaylist)
 
 	def musicDoubleClicked(self, item):
-		self.currentMusic = item
+		# self.currentMusic = item
+		# print (item)
 		music = item.dbitem
 		path = os.path.join(self.library.playlistpath, music.playlists[0].name, music.localpath)
-		# path = '{}/{}/{}'.format(self.library.playlistpath, music.playlists[0].name, music.localpath)
-		self.player.setFile(path)
+		# self.player.setFile(path)
+		self.player.setFiles(self.library.makeFileList(self.currentPlaylist, item))
+
+	# def setPlayedList(self, items, start):
+	# 	self.player.setFiles(BadLibrary.BadPlaying(items, start))
+
+
 
 
 	def addMedia(self):

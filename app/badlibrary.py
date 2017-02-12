@@ -4,6 +4,7 @@ import app.badwidgets as widgets
 import app.badmodels as models
 
 import os
+import errno
 import shutil
 
 class BadLibrary(QObject):
@@ -11,6 +12,14 @@ class BadLibrary(QObject):
 	def __init__(self, path, parent):
 		self.path = path
 		self.parent = parent
+
+		try:
+		    os.makedirs(path)
+		except OSError as exc: 
+		    if exc.errno == errno.EEXIST and os.path.isdir(path):
+		        pass
+		    else:
+		        raise
 
 		self.playlistpath = os.path.join(self.path, "playlists")
 		self.dbpath = os.path.join(self.path, "db.sqlite3")
@@ -74,7 +83,21 @@ class BadLibrary(QObject):
 						rest = '...'
 					print ('    | - {}{}'.format(media.name[:80], rest))
 
+	def makeFileList(self, filelist, first):
+		medialist = filelist.libraryitem.medias
+		indicator_start = 0
+		final_list = list()
+		medias_len = len(medialist)
 
+		for i, file in enumerate(medialist):
+			if file == first.libraryitem:
+				indicator_start = i
+				break
+
+		for i in range(0, medias_len):
+			final_list.append(medialist[(i + indicator_start) % medias_len])
+
+		return (final_list)
 
 class BadItem(object):
 	"""docstring for BadItem"""
@@ -147,6 +170,9 @@ class BadPlaylist(BadItem):
 
 	def __repr__(self):
 		return self.__str__()
+
+	def __iter__(self):
+		return self.medias
 		
 
 
@@ -161,8 +187,14 @@ class BadMedia(BadItem):
 		self._name = media.name
 		self._id = media.id
 
+	def getPath(self):
+		return os.path.join(self.parent.parent.playlistpath, self.parent.name, self.dbitem.localpath)
+
 	def __str__(self):
 		return "<BadLibrary.BadPlaylist.BadMedia {} : {}>".format(self.id, self.name)
 
 	def __repr__(self):
 		return self.__str__()
+
+
+
