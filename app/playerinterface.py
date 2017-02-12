@@ -17,6 +17,10 @@ class PlayerInterface(QObject):
 		self.initVLC(config)
 		self.played = list()
 
+		self.mediaplayer_list = None
+		self.filelist = None
+		self.media_list = None
+
 
 	def initVLC(self, config):
 		self.instance = vlc.Instance()
@@ -75,38 +79,14 @@ class PlayerInterface(QObject):
 		# self.playButton.setIcon(self.playicon)
 
 	def setFiles(self, filelist):
-		# # self.currentPlayList = filelist
-		# # media_list = self.instance.media_list_new()
-		# # for item in filelist:
-		# # 	media_item = self.instance.media_new(item.dbitem.localpath)
-		# # 	media_item.parse()
-		# # 	media_list.add_media(media_item)
-		# # 	# item['vlc_index'] = media_list.index_of_item(media_item)
-		# # 	# print(item['vlc_index'])
-		# # # vlc_player = vlc_instance.media_list_player_new()
-		# # # vlc_player.set_media_player(main_player)
-		# # # vlc_events = main_player.event_manager()
-		# # self.mediaplayer_list.set_media_list(media_list)
-		# # self.mediaplayer_list.play()
-		# print ("New file list : ")
-		# print (filelist)
-		# self.media_list = filelist
-		# print ('Set : ', self.media_list[0].getPath())
-		# self.setFile(self.media_list[0].getPath())
-
-		# print ("SET -> ", filename)
-
-
-
-		# self.media = self.instance.media_new(filename)
-		# self.mediaplayer.set_media(self.media)
-		# self.media.parse()
-		# self.parent.setWindowTitle(self.media.get_meta(0))
-
-		# self.mediaplayer = self.instance.media_list_player_new()
-		# print (filelist)
+		print ('New filelist : \n{}'.format(filelist))
+		self.mediaplayer_list = None
+		self.filelist = None
+		self.media_list = None
 		self.indicator = 0
 		self.mediaplayer.stop()
+		self.filelist = filelist
+
 		self.mediaplayer_list = self.instance.media_list_player_new()
 		self.mediaplayer_list.set_media_player(self.mediaplayer)
 		self.media_list = self.instance.media_list_new()
@@ -134,9 +114,9 @@ class PlayerInterface(QObject):
 		# 	self.musicplayed = False
 		# 	self.labelframe.hide()
 		# 	self.parent.videoframe.show()
-		self.parent.videoframe.hide()
-		self.labelframe.show()
-		self.musicplayed = True
+		# self.parent.videoframe.hide()
+		# self.labelframe.show()
+		# self.musicplayed = True
 
 
 			# self.videoframe.
@@ -147,12 +127,29 @@ class PlayerInterface(QObject):
 
 	@vlc.callbackmethod
 	def SongFinished(self, event, status):
+		print ('item finish : ', self.filelist[self.indicator].name)
 		self.indicator += 1
 
 	@vlc.callbackmethod
 	def nextItemSet(self, event, status):
-		print ("event : ", event)
-		print ('status : ', status)
+		# print ("event : ", event)
+		# print ('status : ', status)
+		print ('Item changed : ', self.filelist[self.indicator].name)
+		filename = self.filelist[self.indicator].getPath()
+		extention = os.path.splitext(filename)[1][1:]
+		if extention in ("mp3", "wav"):
+			print ('  it\'s a music')
+			self.parent.videoframe.hide()
+			self.labelframe.show()
+			self.musicplayed = True
+			self.anim.start()
+			# Animation started
+		else:
+			print ('  it\'s a video')
+			self.musicplayed = False
+			self.labelframe.hide()
+			self.parent.videoframe.show()
+		self.mediaplayer.play()
 
 
 	def setFile(self, filename):

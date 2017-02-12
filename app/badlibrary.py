@@ -84,13 +84,15 @@ class BadLibrary(QObject):
 					print ('    | - {}{}'.format(media.name[:80], rest))
 
 	def makeFileList(self, filelist, first):
+		# print ("Make file list from : ", first.libraryitem)
+		# print ('Playlist : ', filelist.libraryitem.medias)
 		medialist = filelist.libraryitem.medias
 		indicator_start = 0
 		final_list = list()
 		medias_len = len(medialist)
 
 		for i, file in enumerate(medialist):
-			if file == first.libraryitem:
+			if file.name == first.libraryitem.name:
 				indicator_start = i
 				break
 
@@ -188,7 +190,7 @@ class BadMedia(BadItem):
 		self._id = media.id
 
 	def getPath(self):
-		return os.path.join(self.parent.parent.playlistpath, self.parent.name, self.dbitem.localpath)
+		return os.path.join(self.parent.parent.playlistpath, self.dbitem.playlists[0].name, self.dbitem.localpath)
 
 	def __str__(self):
 		return "<BadLibrary.BadPlaylist.BadMedia {} : {}>".format(self.id, self.name)
