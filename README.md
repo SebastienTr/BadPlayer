@@ -54,10 +54,10 @@ Now it's quite ugly and really not convenient to use, on this link there is some
 - UI
 
 ######Multi play
-Now we just can play one song, it's not that convenient
+Some bugs when we change playlist
 
 ######Windows
-Change path (pictures done)
+Change path (pictures done), need to change medias paths
 
 ######Pytube or not pytube ?
 https://github.com/nficano/pytube

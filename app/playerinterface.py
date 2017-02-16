@@ -36,7 +36,7 @@ class PlayerInterface(QObject):
 		logging.getLogger("mpgatofixed32").setLevel(logging.NOTSET)		
 		logging.getLogger("core vout").setLevel(logging.NOTSET)
 
-		gifpath = "app/images/player/animation.gif"
+		gifpath = os.path.join("app", "images", "player", "animation.gif")
 		self.labelframe = QLabel(self.parent)
 		self.labelframe.setScaledContents(True)
 		self.labelframe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -68,7 +68,7 @@ class PlayerInterface(QObject):
 			self.parent.timer.start()
 			self.isPaused = False
 			if self.musicplayed is False:
-				self.anim.start ()
+				self.anim.start()
 				self.musicplayed = True
 
 
@@ -79,7 +79,7 @@ class PlayerInterface(QObject):
 		# self.playButton.setIcon(self.playicon)
 
 	def setFiles(self, filelist):
-		print ('New filelist : \n{}'.format(filelist))
+		# print ('New filelist : \n{}'.format(filelist))
 		self.mediaplayer_list = None
 		self.filelist = None
 		self.media_list = None
@@ -103,86 +103,66 @@ class PlayerInterface(QObject):
 		elif sys.platform == "darwin": # for MacOS
 			self.mediaplayer.set_nsobject(int(self.parent.videoframe.winId()))
 
-		# extention = os.path.splitext(filename)[1][1:]
-		# if extention in ("mp3", "wav"):
-		# 	self.parent.videoframe.hide()
-		# 	self.labelframe.show()
-		# 	self.musicplayed = True
-		# 	self.anim.start()
-		# 	# print ("Animation started")
-		# else:
-		# 	self.musicplayed = False
-		# 	self.labelframe.hide()
-		# 	self.parent.videoframe.show()
-		# self.parent.videoframe.hide()
-		# self.labelframe.show()
-		# self.musicplayed = True
-
-
-			# self.videoframe.
-		# print (self.media.get_duration())
-		# self.parent.totalTime.setText(self.getTimeString(self.media.get_duration()))
 		self.PlayPause()
-		# self.parent.setStatus("Media added to player")
 
 	@vlc.callbackmethod
 	def SongFinished(self, event, status):
-		print ('item finish : ', self.filelist[self.indicator].name)
+		# print ('item finish : ', self.filelist[self.indicator].name)
 		self.indicator += 1
 
 	@vlc.callbackmethod
 	def nextItemSet(self, event, status):
-		# print ("event : ", event)
-		# print ('status : ', status)
-		print ('Item changed : ', self.filelist[self.indicator].name)
+		# print ('Item changed : ', self.filelist[self.indicator].name)
 		filename = self.filelist[self.indicator].getPath()
 		extention = os.path.splitext(filename)[1][1:]
 		if extention in ("mp3", "wav"):
-			print ('  it\'s a music')
+			# print ('  it\'s a music')
 			self.parent.videoframe.hide()
 			self.labelframe.show()
 			self.musicplayed = True
 			self.anim.start()
 			# Animation started
 		else:
-			print ('  it\'s a video')
+			# print ('  it\'s a video')
 			self.musicplayed = False
 			self.labelframe.hide()
 			self.parent.videoframe.show()
+		print ('duration : ', self.media_list[self.indicator].get_duration())
+		self.parent.totalTime.setText(self.getTimeString(self.media_list[self.indicator].get_duration()))
 		self.mediaplayer.play()
 
 
-	def setFile(self, filename):
-		# print ("SET -> ", filename)
-		self.media = self.instance.media_new(filename)
-		self.mediaplayer.set_media(self.media)
-		self.media.parse()
-		self.parent.setWindowTitle(self.media.get_meta(0))
+	# def setFile(self, filename):
+	# 	# print ("SET -> ", filename)
+	# 	self.media = self.instance.media_new(filename)
+	# 	self.mediaplayer.set_media(self.media)
+	# 	self.media.parse()
+	# 	self.parent.setWindowTitle(self.media.get_meta(0))
 
-		if sys.platform.startswith('linux'): # for Linux using the X Server
-			self.mediaplayer.set_xwindow(self.parent.videoframe.winId())
-		elif sys.platform == "win32": # for Windows
-			self.mediaplayer.set_hwnd(self.parent.videoframe.winId())
-		elif sys.platform == "darwin": # for MacOS
-			self.mediaplayer.set_nsobject(int(self.parent.videoframe.winId()))
+	# 	if sys.platform.startswith('linux'): # for Linux using the X Server
+	# 		self.mediaplayer.set_xwindow(self.parent.videoframe.winId())
+	# 	elif sys.platform == "win32": # for Windows
+	# 		self.mediaplayer.set_hwnd(self.parent.videoframe.winId())
+	# 	elif sys.platform == "darwin": # for MacOS
+	# 		self.mediaplayer.set_nsobject(int(self.parent.videoframe.winId()))
 
-		extention = os.path.splitext(filename)[1][1:]
-		if extention in ("mp3", "wav"):
-			self.parent.videoframe.hide()
-			self.labelframe.show()
-			self.musicplayed = True
-			self.anim.start()
-			# Animation started
-		else:
-			self.musicplayed = False
-			self.labelframe.hide()
-			self.parent.videoframe.show()
+	# 	extention = os.path.splitext(filename)[1][1:]
+	# 	if extention in ("mp3", "wav"):
+	# 		self.parent.videoframe.hide()
+	# 		self.labelframe.show()
+	# 		self.musicplayed = True
+	# 		self.anim.start()
+	# 		# Animation started
+	# 	else:
+	# 		self.musicplayed = False
+	# 		self.labelframe.hide()
+	# 		self.parent.videoframe.show()
 
-			# self.videoframe.
-		# print (self.media.get_duration())
-		self.parent.totalTime.setText(self.getTimeString(self.media.get_duration()))
-		self.PlayPause()
-		self.parent.setStatus("Media added to player")
+	# 		# self.videoframe.
+	# 	# print (self.media.get_duration())
+	# 	self.parent.totalTime.setText(self.getTimeString(self.media.get_duration()))
+	# 	self.PlayPause()
+	# 	self.parent.setStatus("Media added to player")
 
 	def setVolume(self, Volume):
 		"""Set the volume
