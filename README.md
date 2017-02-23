@@ -69,3 +69,6 @@ Hmm ... a lot of work there !
   * One music download
   * One video download
   * One parallel music + video download
+
+######Manage meta datas
+https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.Meta-class.html

@@ -127,9 +127,14 @@ class PlayerInterface(QObject):
 			self.musicplayed = False
 			self.labelframe.hide()
 			self.parent.videoframe.show()
-		print ('duration : ', self.media_list[self.indicator].get_duration())
-		self.parent.totalTime.setText(self.getTimeString(self.media_list[self.indicator].get_duration()))
+
+		# print ('duration : ', self.media_list[self.indicator])
+
 		self.mediaplayer.play()
+
+		print ('mrl : ', self.mediaplayer.get_media().get_mrl())
+		# print ('meta : ', self.mediaplayer.get_media().get_meta())
+		self.parent.totalTime.setText(self.getTimeString(self.media_list[self.indicator].get_duration()))
 
 
 	# def setFile(self, filename):
