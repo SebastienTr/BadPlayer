@@ -3,6 +3,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 import youtube_dl
 import threading
 
+import os, time
+
 dlThread = dict()
 hWindow = 0
 # fProgressCounter = 0.0
@@ -10,12 +12,13 @@ info = None
 
 class DLItem(QObject):
 	"""This class is a representation of a downloading element"""
-	def __init__(self, parent, url=None, id=0):
+	def __init__(self, parent, url=None, id=0, playlist=None):
 		super(DLItem, self).__init__()
 		self.url = url
 		self.parent = parent
 		self.id = id
 		self.format = 'audio' # 'video' 'audio'
+		self.playlist = playlist
 
 		self.hSignals = sigHandling(self.id)
 		self.hSignals.dlProgress_update.connect(self.hSignals.pbar_incrementer)
@@ -56,8 +59,54 @@ class DLItem(QObject):
 			}
 
 
-		dlThread[self.id] = threading.Thread(target=self.hSignals.runDL,args=(self.url,ydl_opts))
+		dlThread[self.id] = threading.Thread(target=self.hSignals.runDL,args=(self.url, self, ydl_opts))
 		dlThread[self.id].start()
+
+	def done(self, info):
+		print ('Done method')
+		filepath = info['filename']
+
+		# dlitem = self.getById(id)
+
+		format = '.mp3' if self.format == 'audio' else '.mp4'
+
+		tmpfilename = info['tmpfilename']
+		otherfilename = info['filename']
+		finalfilename = (info['filename'].replace('.webm', '')
+										.replace('.mp4', '')
+										.replace('.m4a', '')
+										.replace('.part', '')
+										)
+		if self.format == 'video':
+			# finalfilename = finalfilename[:-5]
+			webmfilename = finalfilename + ".webm"
+			finalfilename = finalfilename + format
+		else:
+			# finalfilename = finalfilename[:-4]
+			webmfilename = finalfilename + ".webm"
+			finalfilename = finalfilename + format
+		name = os.path.splitext(os.path.basename(finalfilename))[0]
+
+		while os.path.exists(tmpfilename) or os.path.exists(otherfilename) or os.path.exists(webmfilename):
+			time.sleep(0.5)
+
+		print ('tmpfilename :', tmpfilename)
+		print ('otherfilename :', otherfilename)
+		print ('finalfilename :', finalfilename)
+		print ('webmfilename :', webmfilename)
+		print ('name :', name)
+		# artist_name, song_name = self.getTitleAuthor(name[:-11])
+		# print ('title', song_name)
+		# print ('artist', artist_name)
+		# https://www.youtube.com/watch?v=TKHz-_MmH68
+		# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
+		print ("Add to DB")
+		self.playlist.addMedia(name=name, filename=finalfilename, source='Youtube', sourceurl=self.url)
+		print ("ok it's really done now !!!")
+		if os.path.exists(finalfilename) is True:
+			os.remove(finalfilename)
+		# models.add_music(self.parent.session, filename, self.playlistname, self.playlistid, self.parent.playlistpath, source="Youtube")
+		self.parent.parent.fillMusicTable(self.parent.parent.currentPlaylist)
 
 class sigHandling(QObject):
 	dlProgress_update = pyqtSignal(float)
@@ -76,10 +125,13 @@ class sigHandling(QObject):
 	def dlDone(self):
 		print ('Done signal recieve in handler')
 		hWindow.pbar.setValue(100)
-		hWindow.done(info, self.id)
+		# hWindow.done(info, self.id)
+		self.item.done(info)
 
-	def runDL(self, url, ydl_opts):
+	def runDL(self, url, item, ydl_opts):
 		global dlThread, hWindow, info
+
+		self.item = item
 
 		def my_hook(d):
 			if d['status'] == 'downloading':

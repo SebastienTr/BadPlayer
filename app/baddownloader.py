@@ -40,7 +40,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 			return
 
 		self.lastId += 1
-		dlitem = network.DLItem(self, url=url, id=self.lastId)
+		dlitem = network.DLItem(self, url=url, id=self.lastId, playlist=playlist)
 		self.items.append(dlitem)
 
 		return
@@ -79,48 +79,48 @@ class Downloader(QMainWindow, Ui_Downloader):
 		path = path.replace('/', '_')
 		return path
 
-	def done(self, info, id):
-		print ('Done method')
-		filepath = info['filename']
+	# def done(self, info, id):
+	# 	print ('Done method')
+	# 	filepath = info['filename']
 
-		dlitem = self.getById(id)
+	# 	dlitem = self.getById(id)
 
-		format = '.mp3' if dlitem.format == 'audio' else '.mp4'
+	# 	format = '.mp3' if dlitem.format == 'audio' else '.mp4'
 
-		tmpfilename = info['tmpfilename']
-		otherfilename = info['filename']
-		finalfilename = info['filename'].replace('.webm', '').replace('.mp4', '')
-		if dlitem.format == 'video':
-			finalfilename = finalfilename[:-5]
-			webmfilename = finalfilename + ".webm"
-			finalfilename = finalfilename + format
-		else:
-			# finalfilename = finalfilename[:-4]
-			webmfilename = finalfilename + ".webm"
-			finalfilename = finalfilename + format
-		name = os.path.splitext(os.path.basename(finalfilename))[0]
+	# 	tmpfilename = info['tmpfilename']
+	# 	otherfilename = info['filename']
+	# 	finalfilename = info['filename'].replace('.webm', '').replace('.mp4', '')
+	# 	if dlitem.format == 'video':
+	# 		finalfilename = finalfilename[:-5]
+	# 		webmfilename = finalfilename + ".webm"
+	# 		finalfilename = finalfilename + format
+	# 	else:
+	# 		# finalfilename = finalfilename[:-4]
+	# 		webmfilename = finalfilename + ".webm"
+	# 		finalfilename = finalfilename + format
+	# 	name = os.path.splitext(os.path.basename(finalfilename))[0]
 
-		while os.path.exists(tmpfilename) or os.path.exists(otherfilename) or os.path.exists(webmfilename):
-			time.sleep(0.5)
-		playlist = self.playlist
+	# 	while os.path.exists(tmpfilename) or os.path.exists(otherfilename) or os.path.exists(webmfilename):
+	# 		time.sleep(0.5)
+	# 	playlist = self.playlist
 
-		print (tmpfilename)
-		print (otherfilename)
-		print (finalfilename)
-		print (webmfilename)
-		print (name[:-11])
-		# artist_name, song_name = self.getTitleAuthor(name[:-11])
-		# print ('title', song_name)
-		# print ('artist', artist_name)
-		# https://www.youtube.com/watch?v=TKHz-_MmH68
-		# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
-		print ("Add to DB")
-		playlist.addMedia(name=name, filename=finalfilename, source='Youtube', sourceurl=dlitem.url)
-		print ("ok it's really done now !!!")
-		if os.path.exists(finalfilename) is True:
-			os.remove(finalfilename)
-		# models.add_music(self.parent.session, filename, self.playlistname, self.playlistid, self.parent.playlistpath, source="Youtube")
-		self.parent.fillMusicTable(self.parent.currentPlaylist)
+	# 	print (tmpfilename)
+	# 	print (otherfilename)
+	# 	print (finalfilename)
+	# 	print (webmfilename)
+	# 	print (name[:-11])
+	# 	# artist_name, song_name = self.getTitleAuthor(name[:-11])
+	# 	# print ('title', song_name)
+	# 	# print ('artist', artist_name)
+	# 	# https://www.youtube.com/watch?v=TKHz-_MmH68
+	# 	# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
+	# 	print ("Add to DB")
+	# 	playlist.addMedia(name=name, filename=finalfilename, source='Youtube', sourceurl=dlitem.url)
+	# 	print ("ok it's really done now !!!")
+	# 	if os.path.exists(finalfilename) is True:
+	# 		os.remove(finalfilename)
+	# 	# models.add_music(self.parent.session, filename, self.playlistname, self.playlistid, self.parent.playlistpath, source="Youtube")
+	# 	self.parent.fillMusicTable(self.parent.currentPlaylist)
 
 	def getTitleAuthor(self, name):
 		parser = parsers.YoutubeTitleParser(name)
