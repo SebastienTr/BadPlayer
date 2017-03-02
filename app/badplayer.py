@@ -8,7 +8,7 @@ import PyQt5 as qt
 import app.badwidgets as widgets
 import app.badmodels as models
 from app.badlibrary import BadLibrary
-from app.playerinterface import PlayerInterface
+from app.badinterface import PlayerInterface
 
 # import logging
 import yaml
