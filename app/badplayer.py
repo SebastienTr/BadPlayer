@@ -10,13 +10,11 @@ import app.badmodels as models
 from app.badlibrary import BadLibrary
 from app.badinterface import PlayerInterface
 
-# import logging
 import yaml
 import sys
 import sip
 import os
 
-# from ui.MainWindow import Ui_MainWindow
 from app.ui.MainWindow import Ui_MainWindow
 
 from app.baddownloader import Downloader
@@ -41,9 +39,7 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.homepath = os.path.expanduser("~")
 		self.librarypath = os.path.join(self.homepath, "Music", "BadPlayer")
 		self.library =  BadLibrary(self.librarypath, self)
-		# os.makedirs(self.library.playlistpath, exist_ok=True)
 
-		# self.initVLC(self.config['player'])
 		self.player = PlayerInterface(self.config['player'], self)
 
 		self.initUI()
@@ -80,7 +76,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 	## this function should be externalized
 	def fillPlaylistTable(self):
 		playlists = self.library.getPlaylists()
-		# print (playlists)
 
 		self.playlistTable.setColumnCount(1)
 		self.playlistTable.clear()
@@ -88,7 +83,6 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.playlistTable.horizontalHeader().setStretchLastSection(True)
 
 		for i, playlist in enumerate(playlists):
-			# print ('fill ', playlist.id, playlist.name)
 			qitem = widgets.TableWidgetItem(playlist)
 			self.playlistTable.setItem(i, 0, qitem)
 
