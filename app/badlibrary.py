@@ -101,6 +101,10 @@ class BadLibrary(QObject):
 
 		return (final_list)
 
+	def __iter__(self):
+		return self.playlists
+
+
 class BadItem(object):
 	"""docstring for BadItem"""
 	def __init__(self, parent):
@@ -119,8 +123,6 @@ class BadItem(object):
 	def id(self):
 		return self._id
 
-
-		
 class BadPlaylist(BadItem):
 	"""A BadPlaylist is an element allowed to interact with the Playlist model"""
 	def __init__(self, playlist, parent):

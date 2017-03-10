@@ -160,6 +160,7 @@ class sigHandling(QObject):
 						print ("-- EXCEPTON EXCEPTON EXCEPTON EXCEPTON EXCEPTON ")
 						print (edl)
 						print ("--------------")
+						tryit()
 				except Exception as einfo:
 					print ("EXCEPTON EXCEPTON EXCEPTON EXCEPTON EXCEPTON ")
 					print (einfo)
