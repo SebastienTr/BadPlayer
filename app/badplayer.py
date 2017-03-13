@@ -65,6 +65,8 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.currentPlaylist = self.library.itemall.tableItem
 
 		self.musicTable.itemDoubleClicked.connect(self.musicDoubleClicked)
+		self.musicTable.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.musicTable.customContextMenuRequested.connect(self.MediaContextMenu) # Manage the context menu
 
 	def initMenu(self):
 		self.actionOpen.triggered.connect(self.OpenFile)
@@ -126,6 +128,14 @@ class BadPlayer(QMainWindow, Ui_MainWindow):
 		self.volumeSlider.setMaximum(100)
 		self.volumeSlider.setValue(self.player.getAudioVolume())
 		self.volumeSlider.valueChanged.connect(self.setVolume)
+
+	def MediaContextMenu(self, position):
+		menu = QMenu()
+		deleteAction = menu.addAction("Delete")
+		action = menu.exec_(self.musicTable.mapToGlobal(position))
+		if action == deleteAction:
+			  print ("DeleteAction")
+			  pass
 
 	def PlayPause(self):
 		self.player.PlayPause()
