@@ -10,12 +10,16 @@ hWindow = 0
 # fProgressCounter = 0.0
 info = None
 
+id = 0
+
 class DLItem(QObject):
 	"""This class is a representation of a downloading element"""
-	def __init__(self, parent, url=None, id=0, playlist=None):
+	def __init__(self, parent, url=None, playlist=None):
 		super(DLItem, self).__init__()
 		self.url = url
 		self.parent = parent
+		global id
+		id += 1
 		self.id = id
 		self.format = 'audio' # 'video' 'audio'
 		self.playlist = playlist
@@ -95,9 +99,9 @@ class DLItem(QObject):
 		print ('finalfilename :', finalfilename)
 		print ('webmfilename :', webmfilename)
 		print ('name :', name)
-		# artist_name, song_name = self.getTitleAuthor(name[:-11])
-		# print ('title', song_name)
-		# print ('artist', artist_name)
+		artist_name, song_name = self.getTitleAuthor(name[:-11])
+		print ('title', song_name)
+		print ('artist', artist_name)
 		# https://www.youtube.com/watch?v=TKHz-_MmH68
 		# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
 		print ("Add to DB")

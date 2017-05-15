@@ -4,4 +4,4 @@ database:
     password: "password"
 
 player:
-    default_volume: 90
+    default_volume: 95

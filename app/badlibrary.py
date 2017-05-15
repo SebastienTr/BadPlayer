@@ -191,6 +191,10 @@ class BadMedia(BadItem):
 		self._name = media.name
 		self._id = media.id
 
+		self.title = ""
+		self.author = ""
+		self.album = ""
+
 	def getPath(self):
 		return os.path.join(self.parent.parent.playlistpath, self.dbitem.playlists[0].name, self.dbitem.localpath)
 

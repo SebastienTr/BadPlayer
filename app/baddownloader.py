@@ -40,7 +40,7 @@ class Downloader(QMainWindow, Ui_Downloader):
 			return
 
 		self.lastId += 1
-		dlitem = network.DLItem(self, url=url, id=self.lastId, playlist=playlist)
+		dlitem = network.DLItem(self, url=url, playlist=playlist)
 		self.items.append(dlitem)
 
 		return

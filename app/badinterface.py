@@ -132,7 +132,7 @@ class PlayerInterface(QObject):
 
 		self.mediaplayer.play()
 
-		print ('mrl : ', self.mediaplayer.get_media().get_mrl())
+		# print ('mrl : ', self.mediaplayer.get_media().get_mrl())
 		# print ('meta : ', self.mediaplayer.get_media().get_meta())
 		self.parent.totalTime.setText(self.getTimeString(self.media_list[self.indicator].get_duration()))
 
