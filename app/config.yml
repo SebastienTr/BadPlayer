@@ -7,4 +7,4 @@ browser:
     playlistpath: "./playlists"
 
 player:
-    default_volume: 100
+    default_volume: 50
