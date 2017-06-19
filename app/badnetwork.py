@@ -99,9 +99,9 @@ class DLItem(QObject):
 		print ('finalfilename :', finalfilename)
 		print ('webmfilename :', webmfilename)
 		print ('name :', name)
-		artist_name, song_name = self.getTitleAuthor(name[:-11])
-		print ('title', song_name)
-		print ('artist', artist_name)
+		# artist_name, song_name = self.getTitleAuthor(name[:-11])
+		# print ('title', song_name)
+		# print ('artist', artist_name)
 		# https://www.youtube.com/watch?v=TKHz-_MmH68
 		# filename = '{}/{}'.format(self.parent.library.playlistpath, self.formatPath(info['title']), info['id'], 'mp3')
 		print ("Add to DB")
