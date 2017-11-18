@@ -3,5 +3,6 @@ database:
     user: "user"
     password: "password"
 
+
 player:
     default_volume: 100
